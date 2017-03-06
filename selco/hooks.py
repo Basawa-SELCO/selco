@@ -30,7 +30,7 @@ app_license = "MIT"
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+#    "Role": "home_page"
 # }
 
 # Website user home page (by function)
@@ -59,11 +59,11 @@ app_license = "MIT"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+#     "Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
+#     "Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # Document Events
@@ -71,11 +71,11 @@ app_license = "MIT"
 # Hook on document methods and events
 
 # doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
+#     "*": {
+#         "on_update": "method",
+#         "on_cancel": "method",
+#         "on_trash": "method"
+#    }
 # }
 
 doc_events = {
@@ -97,6 +97,12 @@ doc_events = {
     },
     "Stock Entry": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates"
+    },
+    "Customer": {
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_updates"
+    },
+    "Customer": {
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_before_insert"
     }
  }
 
@@ -104,21 +110,21 @@ doc_events = {
 # ---------------
 
 # scheduler_events = {
-# 	"all": [
-# 		"selco.tasks.all"
-# 	],
-# 	"daily": [
-# 		"selco.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"selco.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"selco.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"selco.tasks.monthly"
-# 	]
+#     "all": [
+#         "selco.tasks.all"
+#     ],
+#     "daily": [
+#         "selco.tasks.daily"
+#     ],
+#     "hourly": [
+#         "selco.tasks.hourly"
+#     ],
+#     "weekly": [
+#         "selco.tasks.weekly"
+#     ]
+#     "monthly": [
+#         "selco.tasks.monthly"
+#     ]
 # }
 
 # Testing
@@ -130,5 +136,5 @@ doc_events = {
 # ------------------------------
 #
 # override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "selco.event.get_events"
+#     "frappe.desk.doctype.event.event.get_events": "selco.event.get_events"
 # }
