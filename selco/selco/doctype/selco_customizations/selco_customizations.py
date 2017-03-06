@@ -34,7 +34,6 @@ def selco_warranty_claim_updates(doc,method):
 
 @frappe.whitelist()
 def selco_delivery_note_updates(doc,method):
-    frappe.msgprint("Triggered Delivery Note 3.14 before insert")
     selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
     selco_cost_center = frappe.db.get_value("Warehouse",selco_warehouse,"cost_center")
     for d in doc.get('items'):
@@ -99,13 +98,13 @@ def selco_stock_entry_updates(doc,method):
             d.cost_center = selco_cost_center
     #End of Insert By basawaraj On 21st Dec
 
+@frappe.whitelist()
+def selco_customer_before_insert(doc,method):
+    doc.naming_series = frappe.db.get_value("Branch",doc.branch,"customer_naming_series")
 
 @frappe.whitelist()
 def selco_customer_updates(doc,method):
-    frappe.msgprint("Naming series is " + doc.naming_series)
-    frappe.msgprint("Customer ID is " + doc.name)
     doc.naming_series = frappe.db.get_value("Branch",doc.branch,"customer_naming_series")
-    frappe.msgprint("New Naming series is " + doc.naming_series)
     if not ( doc.customer_contact_number or doc.landline_mobile_2 ):
         frappe.throw("Enter either Customer Contact Number ( Mobile 1 ) or Landline / Mobile 2")
     var4 = frappe.db.get_value("Customer", {"customer_contact_number": (doc.customer_contact_number)})
@@ -113,10 +112,6 @@ def selco_customer_updates(doc,method):
     var6 = frappe.db.get_value("Customer", {"customer_contact_number": (doc.customer_contact_number)}, "customer_name")
     if var5 != "None" and doc.name != var5:
         frappe.throw("Customer with contact no " + doc.customer_contact_number + " already exists \n Customer ID : " + var5 + "\n Customer Name : " + var6)
-
-@frappe.whitelist()
-def selco_customer_before_insert(doc,method):
-    doc.naming_series = frappe.db.get_value("Branch",doc.branch,"customer_naming_series")
 
 @frappe.whitelist()
 def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):

@@ -99,10 +99,8 @@ doc_events = {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates"
     },
     "Customer": {
-         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_updates"
-    },
-    "Customer": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_before_insert"
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_before_insert",
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_updates"     
     }
  }
 
