@@ -100,7 +100,10 @@ doc_events = {
     },
     "Customer": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_before_insert",
-         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_updates"     
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_updates"
+    },
+    "Sales Invoice": {
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_before_insert"
     }
  }
 

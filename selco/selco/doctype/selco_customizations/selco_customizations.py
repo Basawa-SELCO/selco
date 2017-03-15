@@ -119,3 +119,13 @@ def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
     from_warehouse = frappe.db.get_value("Branch",selco_branch,"git_warehouse")
     to_warehouse = frappe.db.get_value("Branch",selco_branch,"selco_warehouse")
     return { 'dc' : selco_var_dc,'from_warehouse' : from_warehouse, 'to_warehouse' :to_warehouse }
+
+@frappe.whitelist()
+def selco_sales_invoice_before_insert(doc,method):
+    selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
+    selco_cost_center = frappe.db.get_value("Warehouse",selco_warehouse,"cost_center")
+    for d in doc.get('items'):
+        d.cost_center = selco_cost_center
+        d.income_account = doc.sales_account
+    for d in doc.get('taxes'):
+        d.cost_center = selco_cost_center
