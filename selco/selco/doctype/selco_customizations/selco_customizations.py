@@ -87,6 +87,8 @@ def selco_purchase_receipt_updates(doc,method):
 @frappe.whitelist()
 def selco_stock_entry_updates(doc,method):
     #Inserted By basawaraj On 21st Dec
+    if doc.purpose=="Repack":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_material_naming_series")
     if doc.purpose=="Material Transfer":
         selco_cost_center = frappe.db.get_value("Warehouse",doc.to_warehouse,"cost_center")
         for d in doc.get('items'):
@@ -95,6 +97,12 @@ def selco_stock_entry_updates(doc,method):
         selco_cost_center = frappe.db.get_value("Warehouse",doc.from_warehouse,"cost_center")
         for d in doc.get('items'):
             d.expense_account = "Stock Adjustment - SELCO"
+            d.cost_center = selco_cost_center
+    if doc.purpose=="Repack":
+        if doc.from_warehouse != doc.to_warehouse:
+            frappe.throw("While repacking From and To Warehouses must be same");
+        selco_cost_center = frappe.db.get_value("Warehouse",doc.to_warehouse,"cost_center")
+        for d in doc.get('items'):
             d.cost_center = selco_cost_center
     #End of Insert By basawaraj On 21st Dec
 
@@ -112,6 +120,11 @@ def selco_customer_updates(doc,method):
     var6 = frappe.db.get_value("Customer", {"customer_contact_number": (doc.customer_contact_number)}, "customer_name")
     if var5 != "None" and doc.name != var5:
         frappe.throw("Customer with contact no " + doc.customer_contact_number + " already exists \n Customer ID : " + var5 + "\n Customer Name : " + var6)
+    var14 = frappe.db.get_value("Customer", {"landline_mobile_2": (doc.landline_mobile_2)})
+    var15 = unicode(var14) or u''
+    var16 = frappe.db.get_value("Customer", {"landline_mobile_2": (doc.landline_mobile_2)}, "customer_name")
+    if var15 != "None" and doc.name != var15:
+        frappe.throw("Customer with Landline Number " + doc.landline_mobile_2 + " already exists \n Customer ID : " + var15 + "\n Customer Name : " + var16)
 
 @frappe.whitelist()
 def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
@@ -122,6 +135,16 @@ def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
 
 @frappe.whitelist()
 def selco_sales_invoice_before_insert(doc,method):
+    if doc.is_return == 1:
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"credit_note_naming_series")
+    else:
+        if doc.type_of_invoice == "System Sales Invoice" or doc.type_of_invoice == "Spare Sales Invoice":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"sales_invoice_naming_series")
+        elif doc.type_of_invoice == "Service Bill":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"service_bill_naming_series")
+        elif doc.type_of_invoice == "Bill of Sale":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_sales_naming_series")
+
     selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
     selco_cost_center = frappe.db.get_value("Warehouse",selco_warehouse,"cost_center")
     for d in doc.get('items'):
@@ -129,3 +152,45 @@ def selco_sales_invoice_before_insert(doc,method):
         d.income_account = doc.sales_account
     for d in doc.get('taxes'):
         d.cost_center = selco_cost_center
+
+def selco_payment_entry_before_insert(doc,method):
+    if doc.payment_type == "Receive":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"receipt_naming_series")
+        #if doc.mode_of_payment == "Bank":
+        doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account")
+    elif doc.payment_type == "Pay":
+        if doc.mode_of_payment == "Bank":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_naming_series")
+
+def selco_journal_entry_before_insert(doc,method):
+    local_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
+    for account in doc.accounts:
+        account.cost_center = local_cost_center
+    if doc.voucher_type == "Contra Entry":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"contra_naming_series")
+        if doc.branch == "Head Office" and doc.transfer_type == "Branch Collectiion To Platinum":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_collection")
+        elif doc.branch == "Head Office" and doc.transfer_type == "Platinum To Branch Expenditure":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_expenditure")
+    if doc.voucher_type == "Cash Payment":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"cash_payment_naming_series")
+    if doc.voucher_type == "Debit Note":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"debit_note_naming_series")
+    if doc.voucher_type == "Credit Note":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"credit_note_naming_series")
+    if doc.voucher_type == "Journal Entry":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"journal_entry_naming_series")
+    if doc.voucher_type == "Write Off Entry":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"write_off_naming_series")
+
+@frappe.whitelist()
+def selco_purchase_invoice_before_insert(doc,method):
+    if doc.is_return == 1:
+        doc.naming_series = "DN/HO/16-17/"
+
+@frappe.whitelist()
+def clean_up(doc,method):
+    #var1 = frappe.get_doc("Purchase Receipt", "MRN/S/17/004")
+    #var1.cancel()
+    #frappe.delete_doc("Purchase Receipt", var1.name)
+    #frappe.msgprint("Triggered")

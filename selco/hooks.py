@@ -104,6 +104,18 @@ doc_events = {
     },
     "Sales Invoice": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_before_insert"
+    },
+    "Payment Entry": {
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_payment_entry_before_insert"
+    },
+    "Journal Entry": {
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_journal_entry_before_insert"
+    },
+    "Purchase Invoice": {
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_invoice_before_insert"
+    },
+    "Warehouse Type": {
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.clean_up"
     }
  }
 
