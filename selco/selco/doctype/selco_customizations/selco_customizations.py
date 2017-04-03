@@ -87,25 +87,35 @@ def selco_purchase_receipt_updates(doc,method):
 @frappe.whitelist()
 def selco_stock_entry_updates(doc,method):
     #Inserted By basawaraj On 21st Dec
+    if doc.purpose=="Material Receipt":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_in_naming_series")
+        selco_warehouse = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
+        for d in doc.get('items'):
+            d.t_warehouse = selco_warehouse
+            #d.is_sample_item = 1
+            #d.valuation_rate = 0
+    if doc.purpose=="Material Issue":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_out__naming_series")
+        selco_warehouse = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
+        for d in doc.get('items'):
+            d.f_warehouse = selco_warehouse
+            d.is_sample_item = 1
     if doc.purpose=="Repack":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_material_naming_series")
-    if doc.purpose=="Material Transfer":
-        selco_cost_center = frappe.db.get_value("Warehouse",doc.to_warehouse,"cost_center")
-        for d in doc.get('items'):
-            d.cost_center = selco_cost_center
-    if doc.purpose == "Material Issue":
-        selco_cost_center = frappe.db.get_value("Warehouse",doc.from_warehouse,"cost_center")
-        for d in doc.get('items'):
-            d.expense_account = "Stock Adjustment - SELCO"
-            d.cost_center = selco_cost_center
-    if doc.purpose=="Repack":
         if doc.from_warehouse != doc.to_warehouse:
             frappe.throw("While repacking From and To Warehouses must be same");
         selco_cost_center = frappe.db.get_value("Warehouse",doc.to_warehouse,"cost_center")
         for d in doc.get('items'):
             d.cost_center = selco_cost_center
-    #End of Insert By basawaraj On 21st Dec
-
+    if doc.purpose=="Material Transfer":
+        selco_cost_center = frappe.db.get_value("Warehouse",doc.to_warehouse,"cost_center")
+        for d in doc.get('items'):
+            d.cost_center = selco_cost_center
+    """if doc.purpose == "Material Issue":
+        selco_cost_center = frappe.db.get_value("Warehouse",doc.from_warehouse,"cost_center")
+        for d in doc.get('items'):
+            d.expense_account = "Stock Adjustment - SELCO"
+            d.cost_center = selco_cost_center"""
 @frappe.whitelist()
 def selco_customer_before_insert(doc,method):
     doc.naming_series = frappe.db.get_value("Branch",doc.branch,"customer_naming_series")
@@ -190,6 +200,7 @@ def selco_purchase_invoice_before_insert(doc,method):
 
 @frappe.whitelist()
 def clean_up(doc,method):
+    var1 = 1
     #var1 = frappe.get_doc("Purchase Receipt", "MRN/S/17/004")
     #var1.cancel()
     #frappe.delete_doc("Purchase Receipt", var1.name)
