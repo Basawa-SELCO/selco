@@ -80,7 +80,7 @@ def get_lead_details(filters):
 			cur_date += datetime.timedelta(days=1)
 			count8 = frappe.db.sql("""SELECT COUNT(name) FROM `tabLead` WHERE sales_person = %s AND date = %s""",(se.sales_person_name,cur_date))
 
-			var1 = [branch.name,branch.senior_manager,se.sales_person_name,se.contact_number,se.designation,count1,count2,count3,count4,count5,count6,count7,count8]
+			var1 = [branch.name,branch.senior_manager,se.sales_person_name,se.contact_number,se.designation,count1[0][0],count2[0][0],count3[0][0],count4[0][0],count5[0][0],count6[0][0],count7[0][0],count8[0][0]]
 			branches_with_ses.append(var1)
 		cur_date = msd
 	return branches_with_ses
