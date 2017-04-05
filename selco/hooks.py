@@ -116,6 +116,9 @@ doc_events = {
     },
     "Warehouse Type": {
          "validate": "selco.selco.doctype.selco_customizations.selco_customizations.clean_up"
+    },
+    "Lead": {
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_lead_before_insert"
     }
  }
 

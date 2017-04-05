@@ -205,3 +205,9 @@ def clean_up(doc,method):
     #var1.cancel()
     #frappe.delete_doc("Purchase Receipt", var1.name)
     #frappe.msgprint("Triggered")
+
+@frappe.whitelist()
+def selco_lead_before_insert(doc,method):
+    doc.naming_series = frappe.db.get_value("Branch",doc.branch,"lead_naming_series")
+    if doc.project_enquiry == 1:
+        doc.naming_series = "ENQ/17-18/"

@@ -61,7 +61,7 @@ def get_lead_details(filters):
 
 	branches = frappe.db.sql("""SELECT name,senior_manager FROM `tabBranch` """,as_dict=1)
 	for branch in branches:
-		ses = frappe.db.sql("""SELECT sales_person_name,contact_number,designation FROM `tabSales Person` WHERE parent_sales_person = %s""",(branch.senior_manager),as_dict=1)
+		ses = frappe.db.sql("""SELECT sales_person_name,contact_number,designation FROM `tabSales Person` WHERE parent_sales_person = %s AND branch = %s""",(branch.senior_manager,branch.name),as_dict=1)
 		cur_date = msd
 		for se in ses:
 			count1 = frappe.db.sql("""SELECT COUNT(name) FROM `tabLead` WHERE sales_person = %s AND date = %s""",(se.sales_person_name,cur_date))
