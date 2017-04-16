@@ -41,10 +41,31 @@ def selco_delivery_note_updates(doc,method):
         d.cost_center = selco_cost_center
         if not d.rate:
             d.rate = frappe.db.get_value("Item Price",{"price_list": "Branch Sales","item_code":d.item_code}, "price_list_rate")
+@frappe.whitelist()
+def selco_delivery_note_before_insert(doc,method):
+    if doc.is_return:
+        doc.naming_series = "DC-RET/"
+    else:
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"delivery_note_naming_series")
+    selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
+    selco_cost_center = frappe.db.get_value("Warehouse",selco_warehouse,"cost_center")
+    for d in doc.get('items'):
+        d.warehouse = selco_warehouse
+        d.cost_center = selco_cost_center
+        if not d.rate:
+            d.rate = frappe.db.get_value("Item Price",{"price_list": "Branch Sales","item_code":d.item_code}, "price_list_rate")
+
+@frappe.whitelist()
+def selco_material_request_before_insert(doc,method):
+    doc.naming_series = frappe.db.get_value("Branch",doc.branch,"material_request_naming_series")
+    local_warehouse = frappe.db.get_value("Branch",doc.branch,"git_warehouse")
+    for d in doc.get('items'):
+        if not d.warehouse:
+            d.warehouse = local_warehouse
+    #Start of Insert By Poorvi on 10-09-2016 for IBM value calculation
 
 @frappe.whitelist()
 def selco_material_request_updates(doc,method):
-    #Start of Insert By Poorvi on 10-09-2016 for IBM value calculation
     selco_ibm_value = 0
     #if doc.workflow_state =="Approval Pending by SM - IBM":
     for idx,selco_item in enumerate(doc.items):
@@ -65,6 +86,8 @@ def selco_material_request_updates(doc,method):
          doc.approved_time = now()
     if doc.workflow_state == "Dispatched From Godown - IBM":
          doc.dispatched_time = now()
+         for d in doc.get('items'):
+             d.dispatched_quantity = d.qty
     #End of Insert By Poorvi on 08-02-2017
 
 @frappe.whitelist()
@@ -84,38 +107,103 @@ def selco_purchase_receipt_updates(doc,method):
     doc.selco_list_of_po_date= ','.join([str(i) for i in po_list_date])
     #End of Insert By basawaraj On 7th september for printing the list of PO when PR is done by importing items from multiple PO
 
+
+@frappe.whitelist()
+def test_before_save(doc,method):
+    pass #frappe.msgprint("Before Save")
+
 @frappe.whitelist()
 def selco_stock_entry_updates(doc,method):
-    #Inserted By basawaraj On 21st Dec
-    if doc.purpose=="Material Receipt":
-        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_in_naming_series")
-        selco_warehouse = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
-        for d in doc.get('items'):
-            d.t_warehouse = selco_warehouse
-            #d.is_sample_item = 1
-            #d.valuation_rate = 0
-    if doc.purpose=="Material Issue":
-        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_out__naming_series")
-        selco_warehouse = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
-        for d in doc.get('items'):
-            d.f_warehouse = selco_warehouse
-            d.is_sample_item = 1
-    if doc.purpose=="Repack":
-        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_material_naming_series")
-        if doc.from_warehouse != doc.to_warehouse:
-            frappe.throw("While repacking From and To Warehouses must be same");
-        selco_cost_center = frappe.db.get_value("Warehouse",doc.to_warehouse,"cost_center")
-        for d in doc.get('items'):
-            d.cost_center = selco_cost_center
+    selco_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
+    selco_selco_warehouse = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
+    selco_repair_warehouse = frappe.db.get_value("Branch",doc.branch,"repair_warehouse")
+
     if doc.purpose=="Material Transfer":
-        selco_cost_center = frappe.db.get_value("Warehouse",doc.to_warehouse,"cost_center")
+        if doc.inward_or_outward=="Inward":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"receipt_note_naming_series")
+            if doc.type_of_material=="Good Stock":
+                for d in doc.get('items'):
+                    d.cost_center = selco_cost_center
+                    d.from_warehouse = "SELCO GIT - SELCO"
+                    d.to_warehouse = selco_selco_warehouse
+            else:
+                for d in doc.get('items'):
+                    d.s_warehouse = "SELCO GIT Repair - SELCO"
+                    d.t_warehouse = selco_repair_warehouse
+                    d.cost_center = selco_cost_center
+                    d.is_sample_item = 1
+        elif doc.inward_or_outward=="Outward":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"delivery_note_naming_series")
+            if doc.type_of_material=="Good Stock":
+                doc.from_warehouse = selco_selco_warehouse
+                doc.to_warehouse = "SELCO GIT - SELCO"
+                for d in doc.get('items'):
+                    d.s_warehouse = selco_selco_warehouse
+                    d.t_warehouse = "SELCO GIT - SELCO"
+                    d.cost_center = selco_cost_center
+            else:
+                doc.from_warehouse = selco_repair_warehouse
+                doc.to_warehouse = "SELCO GIT Repair - SELCO"
+                for d in doc.get('items'):
+                    d.s_warehouse = selco_repair_warehouse
+                    d.t_warehouse = "SELCO GIT Repair - SELCO"
+                    d.cost_center = selco_cost_center
+                    d.is_sample_item = 1
+    elif doc.purpose=="Material Receipt":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_in_naming_series")
+        doc.to_warehouse = selco_repair_warehouse
+        for d in doc.get('items'):
+            d.t_warehouse = selco_repair_warehouse
+            d.cost_center = selco_cost_center
+            d.is_sample_item = 1
+    elif doc.purpose=="Material Issue":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_out__naming_series")
+        doc.from_warehouse = selco_repair_warehouse
+        for d in doc.get('items'):
+            d.f_warehouse = selco_repair_warehouse
+            d.cost_center = selco_cost_center
+            d.is_sample_item = 1
+    elif doc.purpose=="Repack":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_material_naming_series")
         for d in doc.get('items'):
             d.cost_center = selco_cost_center
-    """if doc.purpose == "Material Issue":
-        selco_cost_center = frappe.db.get_value("Warehouse",doc.from_warehouse,"cost_center")
-        for d in doc.get('items'):
-            d.expense_account = "Stock Adjustment - SELCO"
+            d.s_warehouse = selco_selco_warehouse
+            d.t_warehouse = selco_selco_warehouse
+
+@frappe.whitelist()
+def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
+    selco_var_dc = frappe.get_doc("Stock Entry",selco_doc_num)
+    if selco_var_dc.being_dispatched_to != selco_branch:
+        frappe.throw("Incorrect DC Number");
+    from_warehouse = selco_var_dc.to_warehouse
+    if selco_var_dc.type_of_material=="Good Stock":
+        to_warehouse = frappe.db.get_value("Branch",selco_var_dc.being_dispatched_to,"selco_warehouse")
+    else:
+        to_warehouse = frappe.db.get_value("Branch",selco_var_dc.being_dispatched_to,"repair_warehouse")
+    return { 'dc' : selco_var_dc,'from_warehouse' : from_warehouse, 'to_warehouse' :to_warehouse }
+
+@frappe.whitelist()
+def get_items_from_rejection_in(selco_rej_in,selco_branch):
+    selco_var_dc = frappe.get_doc("Stock Entry",selco_rej_in)
+    return { 'dc' : selco_var_dc }
+
+    """frappe.msgprint("Button Clicked");
+    selco_cost_center = frappe.db.get_value("Branch",selco_branch,"cost_center")
+    selco_selco_warehouse = frappe.db.get_value("Branch",selco_branch,"selco_warehouse")
+    selco_repair_warehouse = frappe.db.get_value("Branch",selco_branch,"repair_warehouse")
+
+    outward_dc = frappe.get_doc("Stock Entry",selco_doc_num)
+    if outward_dc.type_of_material=="Good Stock":
+        for d in outward_dc.get('items'):
+            d.s_warehouse = "SELCO GIT - SELCO"
+            d.t_warehouse = selco_selco_warehouse
+            d.cost_center = selco_cost_center
+    else:
+        for d in outward_dc.get('items'):
+            d.s_warehouse = "SELCO GIT Repair - SELCO"
+            d.t_warehouse = selco_selco_warehouse
             d.cost_center = selco_cost_center"""
+
 @frappe.whitelist()
 def selco_customer_before_insert(doc,method):
     doc.naming_series = frappe.db.get_value("Branch",doc.branch,"customer_naming_series")
@@ -136,12 +224,7 @@ def selco_customer_updates(doc,method):
     if var15 != "None" and doc.name != var15:
         frappe.throw("Customer with Landline Number " + doc.landline_mobile_2 + " already exists \n Customer ID : " + var15 + "\n Customer Name : " + var16)
 
-@frappe.whitelist()
-def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
-    selco_var_dc = frappe.get_doc("Stock Entry",selco_doc_num)
-    from_warehouse = frappe.db.get_value("Branch",selco_branch,"git_warehouse")
-    to_warehouse = frappe.db.get_value("Branch",selco_branch,"selco_warehouse")
-    return { 'dc' : selco_var_dc,'from_warehouse' : from_warehouse, 'to_warehouse' :to_warehouse }
+
 
 @frappe.whitelist()
 def selco_sales_invoice_before_insert(doc,method):
@@ -150,13 +233,16 @@ def selco_sales_invoice_before_insert(doc,method):
     else:
         if doc.type_of_invoice == "System Sales Invoice" or doc.type_of_invoice == "Spare Sales Invoice":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"sales_invoice_naming_series")
+            #frappe.msgprint("SI Naming series is" + doc.naming_series)
         elif doc.type_of_invoice == "Service Bill":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"service_bill_naming_series")
         elif doc.type_of_invoice == "Bill of Sale":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_sales_naming_series")
 
-    selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
-    selco_cost_center = frappe.db.get_value("Warehouse",selco_warehouse,"cost_center")
+@frappe.whitelist()
+def selco_sales_invoice_on_submit(doc,method):
+    #selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
+    selco_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
     for d in doc.get('items'):
         d.cost_center = selco_cost_center
         d.income_account = doc.sales_account
@@ -192,6 +278,8 @@ def selco_journal_entry_before_insert(doc,method):
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"journal_entry_naming_series")
     if doc.voucher_type == "Write Off Entry":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"write_off_naming_series")
+    if doc.voucher_type == "Bank Payment":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_naming_series")
 
 @frappe.whitelist()
 def selco_purchase_invoice_before_insert(doc,method):

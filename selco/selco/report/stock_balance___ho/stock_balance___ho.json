@@ -7,12 +7,12 @@
  "doctype": "Report", 
  "idx": 0, 
  "is_standard": "Yes", 
- "modified": "2017-03-09 11:49:25.093566", 
+ "modified": "2017-04-10 00:35:42.410673", 
  "modified_by": "Administrator", 
  "module": "Selco", 
  "name": "Stock Balance - HO", 
  "owner": "Administrator", 
- "ref_doctype": "Stock Ledger Entry", 
+ "ref_doctype": "Purchase Invoice", 
  "report_name": "Stock Balance - HO", 
  "report_type": "Script Report"
 }

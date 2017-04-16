@@ -87,29 +87,34 @@ doc_events = {
          "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_warranty_claim_updates"
     },
     "Delivery Note": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_delivery_note_updates"
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_delivery_note_before_insert",
+         "on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_delivery_note_updates"
     },
     "Material Request": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_updates"
+         "on_update": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_updates",
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_before_insert"
     },
     "Purchase Receipt": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_receipt_updates"
     },
     "Stock Entry": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates"
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates",
+         "before_save": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates",
     },
     "Customer": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_before_insert",
          "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_customer_updates"
     },
     "Sales Invoice": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_before_insert"
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_before_insert",
+         "on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_on_submit"
     },
     "Payment Entry": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_payment_entry_before_insert"
     },
     "Journal Entry": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_journal_entry_before_insert"
+         #"on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_journal_entry_on_submit"
     },
     "Purchase Invoice": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_invoice_before_insert"
