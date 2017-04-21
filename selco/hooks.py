@@ -91,7 +91,7 @@ doc_events = {
          "on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_delivery_note_updates"
     },
     "Material Request": {
-         "on_update": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_updates",
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_updates",
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_before_insert"
     },
     "Purchase Receipt": {
