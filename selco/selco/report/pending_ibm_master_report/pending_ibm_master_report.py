@@ -43,5 +43,5 @@ def get_data(filters):
             conditions += ' and A.godown_email_id = "southgodown@selco-india.com"'
         elif choosen_godown == "Dharwad Godown":
             conditions += ' and A.godown_email_id = "northgodown@selco-india.com"'
-    return frappe.db.sql("""SELECT A.selco_date,A.name,A.branch,B.item_name,B.item_code,B.description,B.qty,B.dispatched_quantity,A.godown_email_id from `tabMaterial Request` A  JOIN `tabMaterial Request Item` B ON A.name = B.parent AND A.workflow_state
+    return frappe.db.sql("""SELECT A.selco_date,A.name,A.branch,B.item_name,B.item_code,B.description,B.qty,B.dispatched_quantity,A.godown_email_id,A.workflow_state from `tabMaterial Request` A  JOIN `tabMaterial Request Item` B ON A.name = B.parent AND B.qty-B.dispatched_quantity > 0  AND  A.workflow_state
 IN("Approved - IBM","Partially Dispatched From Godown - IBM") %s""" % (conditions),as_dict=True)

@@ -95,7 +95,8 @@ doc_events = {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_before_insert"
     },
     "Purchase Receipt": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_receipt_updates"
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_receipt_before_insert",
+         "on_update": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_receipt_updates",
     },
     "Stock Entry": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates",

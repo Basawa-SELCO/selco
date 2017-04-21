@@ -91,6 +91,10 @@ def selco_material_request_updates(doc,method):
     #End of Insert By Poorvi on 08-02-2017
 
 @frappe.whitelist()
+def selco_purchase_receipt_before_insert(doc,method):
+    doc.naming_series = frappe.db.get_value("Warehouse",doc.godown,"mrn_naming_series")
+
+@frappe.whitelist()
 def selco_purchase_receipt_updates(doc,method):
     selco_cost_center = frappe.db.get_value("Warehouse",doc.godown,"cost_center")
     for d in doc.get('items'):
@@ -211,6 +215,9 @@ def selco_customer_before_insert(doc,method):
 @frappe.whitelist()
 def selco_customer_updates(doc,method):
     doc.naming_series = frappe.db.get_value("Branch",doc.branch,"customer_naming_series")
+    if doc.customer_contact_number:
+        if len(doc.customer_contact_number) != 10:
+            frappe.throw("Invalid Customer Contact Number ( Mobile 1 ) - Please enter exact 10 digits of mobile no ex : 9900038803")
     if not ( doc.customer_contact_number or doc.landline_mobile_2 ):
         frappe.throw("Enter either Customer Contact Number ( Mobile 1 ) or Landline / Mobile 2")
     var4 = frappe.db.get_value("Customer", {"customer_contact_number": (doc.customer_contact_number)})
