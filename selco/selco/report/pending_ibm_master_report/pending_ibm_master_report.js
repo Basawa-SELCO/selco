@@ -7,7 +7,7 @@ frappe.query_reports["Pending IBM Master Report"] = {
 				"fieldname":"godown",
 				"label": __("Godown"),
 				"fieldtype": "Select",
-				"options": "All Godowns\nBangalore Godown\nManipal Godown\nDharwad Godown",
+				"options": "All Godowns\nBangalore Godown\nManipal Godown\nDharwad Godown\nProjects IBM",
 		}
 
 	]
