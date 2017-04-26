@@ -17,6 +17,7 @@ app_license = "MIT"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/selco/css/selco.css"
 # app_include_js = "/assets/selco/js/selco.js"
+app_include_js = "/assets/js/selco.min.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/selco/css/selco.css"
@@ -125,6 +126,9 @@ doc_events = {
     },
     "Lead": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_lead_before_insert"
+    },
+    "Address": {
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_address_before_insert"
     }
  }
 

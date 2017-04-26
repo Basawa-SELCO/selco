@@ -306,3 +306,9 @@ def selco_lead_before_insert(doc,method):
     doc.naming_series = frappe.db.get_value("Branch",doc.branch,"lead_naming_series")
     if doc.project_enquiry == 1:
         doc.naming_series = "ENQ/17-18/"
+@frappe.whitelist()
+def selco_address_before_insert(doc,method):
+    if doc.customer:
+        temp_name = frappe.get_value("Customer",doc.customer,"customer_name")
+        doc.address_title = doc.customer + " - " + temp_name
+        doc.name = doc.customer + " - " + temp_name + " - "
