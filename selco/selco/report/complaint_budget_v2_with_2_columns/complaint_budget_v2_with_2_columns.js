@@ -14,7 +14,7 @@ frappe.query_reports["Complaint Budget V2 With 2 Columns"] = {
 	"label": __("Fiscal Year"),
 	"fieldtype": "Link",
 	"options": "Fiscal Year",
-	default: "2016-2017"
+	default: "2017-2018"
 	},
 	{
 		"fieldname":"month_number",
