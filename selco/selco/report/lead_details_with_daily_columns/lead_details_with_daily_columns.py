@@ -10,6 +10,7 @@ import datetime
 from datetime import timedelta
 from frappe.utils import cint, flt, nowdate,getdate
 from frappe import msgprint
+from operator import add
 
 def execute(filters=None):
     columns, data = [], []
@@ -22,23 +23,22 @@ def get_lead_details(filters):
     med = "0000/00/00"
     fiscal_year = filters.get("fiscal_year")
     if filters.get("fiscal_year"):
-    	month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-    		"Dec"].index(filters["month_number"]) + 1
-    	ysd = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
-    	#frappe.msgprint(ysd)
-    	from dateutil.relativedelta import relativedelta
-    	import calendar, datetime
-    	diff_mnt = cint(month)-cint(ysd.month)
-    	if diff_mnt<0:
-    		diff_mnt = 12-int(ysd.month)+cint(month)
-    	msd = ysd + relativedelta(months=diff_mnt) # month start date
-    	month_days = cint(calendar.monthrange(cint(msd.year) ,cint(month))[1]) # days in month
-    	med = datetime.date(msd.year, cint(month), month_days) # month end date
+        month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
+            "Dec"].index(filters["month_number"]) + 1
+        ysd = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
+        #frappe.msgprint(ysd)
+        from dateutil.relativedelta import relativedelta
+        import calendar, datetime
+        diff_mnt = cint(month)-cint(ysd.month)
+        if diff_mnt<0:
+            diff_mnt = 12-int(ysd.month)+cint(month)
+        msd = ysd + relativedelta(months=diff_mnt) # month start date
+        month_days = cint(calendar.monthrange(cint(msd.year) ,cint(month))[1]) # days in month
+        med = datetime.date(msd.year, cint(month), month_days) # month end date
     return_list = []
-    #count = {}
     default_count_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0]
 
-    ses_details = frappe.db.sql("""SELECT branch,parent_sales_person,name,contact_number,designation FROM `tabSales Person` WHERE show_in_daily_report = 1""",as_list = True )
+    ses_details = frappe.db.sql("""SELECT branch,parent_sales_person,name,contact_number,designation FROM `tabSales Person` WHERE show_in_daily_report = 1 ORDER BY branch ASC""",as_list = True )
     lead_details = frappe.db.sql("""SELECT date,sales_person FROM `tabLead` WHERE date >= %s AND date <= %s """,(msd,med),as_list = True )
 
     my_local_list = []
@@ -55,8 +55,16 @@ def get_lead_details(filters):
         count[se[2]].append(sum(count[se[2]]))
         se_list = se + count[se[2]]
         return_list.append(se_list)
-    return return_list
 
+    my_list_of_list = []
+    my_total_list = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,0]
+    for key in count:
+        my_list_of_list.append(count[key])
+    my_total_list = map(sum, zip(*my_list_of_list))
+    my_total_list = ["<b>Daily Total</b>","","","",""] + my_total_list
+
+    return_list.append(my_total_list)
+    return return_list
 
 
 def get_columns():
@@ -97,5 +105,5 @@ def get_columns():
         _("29th") + ":Int:40",
         _("30th") + ":Int:40",
         _("31st") + ":Int:40",
-        _("Total") + ":Int:40"        
+        _("Total") + ":Int:40"
         ]
