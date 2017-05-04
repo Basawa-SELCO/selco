@@ -62,32 +62,24 @@ def selco_material_request_before_insert(doc,method):
     for d in doc.get('items'):
         if not d.warehouse:
             d.warehouse = local_warehouse
-    #Start of Insert By Poorvi on 10-09-2016 for IBM value calculation
 
 @frappe.whitelist()
 def selco_material_request_updates(doc,method):
-    selco_ibm_value = 0
-    #if doc.workflow_state =="Approval Pending by SM - IBM":
-    for idx,selco_item in enumerate(doc.items):
-        selco_rate = frappe.db.sql("""select price_list_rate
-            from `tabItem Price`
-            where item_code = %s and price_list = "Branch Sales" """,(selco_item.item_code))
-        if selco_rate:
-            var1=selco_rate[0][0]
-        else:
-            var1=0
-        doc.items[idx].selco_rate =var1
-        selco_ibm_value = selco_ibm_value + (var1 * selco_item.qty)
-    doc.selco_ibm_value = selco_ibm_value
-    #doc.items.sort(key = lambda x: x.item_code)
     doc.items.sort(key=operator.attrgetter("item_code"), reverse=False)
-    #Start of Insert By Poorvi on 08-02-2017
     if doc.workflow_state == "Approved - IBM":
          doc.approved_time = now()
+    if doc.workflow_state == "Partially Dispatched From Godown - IBM":
+        flag = "N"
+        for d in doc.get('items'):
+            if d.dispatched_quantity != 0:
+                flag = "Y"
+        for d in doc.get('items'):
+            if flag != "Y":
+                d.dispatched_quantity = d.qty
     if doc.workflow_state == "Dispatched From Godown - IBM":
-         doc.dispatched_time = now()
-         for d in doc.get('items'):
-             d.dispatched_quantity = d.qty
+        doc.dispatched_time = now()
+        for d in doc.get('items'):
+            d.dispatched_quantity = d.qty
     #End of Insert By Poorvi on 08-02-2017
 
 @frappe.whitelist()
