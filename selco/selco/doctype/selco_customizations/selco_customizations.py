@@ -69,6 +69,7 @@ def selco_material_request_updates(doc,method):
     if doc.workflow_state == "Approved - IBM":
          doc.approved_time = now()
     if doc.workflow_state == "Partially Dispatched From Godown - IBM":
+        frappe.msgprint("Partially")
         flag = "N"
         for d in doc.get('items'):
             if d.dispatched_quantity != 0:
@@ -77,6 +78,7 @@ def selco_material_request_updates(doc,method):
             if flag != "Y":
                 d.dispatched_quantity = d.qty
     if doc.workflow_state == "Dispatched From Godown - IBM":
+        frappe.msgprint("Fully Dispatched")
         doc.dispatched_time = now()
         for d in doc.get('items'):
             d.dispatched_quantity = d.qty
@@ -298,6 +300,15 @@ def selco_lead_before_insert(doc,method):
     doc.naming_series = frappe.db.get_value("Branch",doc.branch,"lead_naming_series")
     if doc.project_enquiry == 1:
         doc.naming_series = "ENQ/17-18/"
+
+@frappe.whitelist()
+def selco_lead_validate(doc,method):
+        if not ( doc.customer_contact_number or doc.customer_contact_number_landline ):
+            frappe.throw("Enter either Customer Contact Number ( Mobile 1 ) or Mobile 2 / Landline")
+        if doc.customer_contact_number:
+            if len(doc.customer_contact_number) != 10:
+                frappe.throw("Invalid Customer Contact Number ( Mobile 1 ) - Please enter exact 10 digits of mobile no ex : 9900038803")
+
 @frappe.whitelist()
 def selco_address_before_insert(doc,method):
     if doc.customer:
