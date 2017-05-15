@@ -29,6 +29,11 @@ def selco_issue_updates(doc,method):
 
 @frappe.whitelist()
 def selco_warranty_claim_updates(doc,method):
+    var4 = frappe.db.get_value("Warranty Claim", {"complaint_number": (doc.complaint_number)})
+    var5 = unicode(var4) or u''
+    var6 = frappe.db.get_value("Warranty Claim", {"complaint_number": (doc.complaint_number)}, "customer_full_name")
+    if var5 != "None" and doc.name != var5:
+        frappe.throw("Warranty Claim for complaint " + doc.complaint_number + " already exists. <br /> Warranty Claim Number : " + var5 + "<br /> Customer Name : " + var6 + "<br /> You cannot link same complaint for tow warranty claims.<br />Please create another complaint.")
     if doc.workflow_state =="Dispatched From Godown":
         doc.status = "Closed"
 
@@ -69,7 +74,6 @@ def selco_material_request_updates(doc,method):
     if doc.workflow_state == "Approved - IBM":
          doc.approved_time = now()
     if doc.workflow_state == "Partially Dispatched From Godown - IBM":
-        frappe.msgprint("Partially")
         flag = "N"
         for d in doc.get('items'):
             if d.dispatched_quantity != 0:
@@ -78,7 +82,6 @@ def selco_material_request_updates(doc,method):
             if flag != "Y":
                 d.dispatched_quantity = d.qty
     if doc.workflow_state == "Dispatched From Godown - IBM":
-        frappe.msgprint("Fully Dispatched")
         doc.dispatched_time = now()
         for d in doc.get('items'):
             d.dispatched_quantity = d.qty
@@ -209,22 +212,27 @@ def selco_customer_before_insert(doc,method):
 @frappe.whitelist()
 def selco_customer_updates(doc,method):
     doc.naming_series = frappe.db.get_value("Branch",doc.branch,"customer_naming_series")
+    if not ( doc.customer_contact_number or doc.landline_mobile_2 ):
+        frappe.throw("Enter either Customer Contact Number ( Mobile 1 ) or Mobile 2 / Landline")
     if doc.customer_contact_number:
         if len(doc.customer_contact_number) != 10:
             frappe.throw("Invalid Customer Contact Number ( Mobile 1 ) - Please enter exact 10 digits of mobile no ex : 9900038803")
-    if not ( doc.customer_contact_number or doc.landline_mobile_2 ):
-        frappe.throw("Enter either Customer Contact Number ( Mobile 1 ) or Landline / Mobile 2")
-    var4 = frappe.db.get_value("Customer", {"customer_contact_number": (doc.customer_contact_number)})
-    var5 = unicode(var4) or u''
-    var6 = frappe.db.get_value("Customer", {"customer_contact_number": (doc.customer_contact_number)}, "customer_name")
-    if var5 != "None" and doc.name != var5:
-        frappe.throw("Customer with contact no " + doc.customer_contact_number + " already exists \n Customer ID : " + var5 + "\n Customer Name : " + var6)
-    var14 = frappe.db.get_value("Customer", {"landline_mobile_2": (doc.landline_mobile_2)})
-    var15 = unicode(var14) or u''
-    var16 = frappe.db.get_value("Customer", {"landline_mobile_2": (doc.landline_mobile_2)}, "customer_name")
-    if var15 != "None" and doc.name != var15:
-        frappe.throw("Customer with Landline Number " + doc.landline_mobile_2 + " already exists \n Customer ID : " + var15 + "\n Customer Name : " + var16)
+        selco_validate_if_customer_contact_number_exists(doc.customer_contact_number,doc.name)
+    if doc.landline_mobile_2:
+        selco_validate_if_customer_contact_number_exists(doc.landline_mobile_2,doc.name)
 
+def selco_validate_if_customer_contact_number_exists(contact_number,customer_id):
+    var4 = frappe.db.get_value("Customer", {"customer_contact_number": (contact_number)})
+    var5 = unicode(var4) or u''
+    var6 = frappe.db.get_value("Customer", {"customer_contact_number": (contact_number)}, "customer_name")
+    if var5 != "None" and customer_id != var5:
+        frappe.throw("Customer with contact no " + contact_number + " already exists \n Customer ID : " + var5 + "\n Lead Name : " + var6)
+
+    var14 = frappe.db.get_value("Customer", {"landline_mobile_2": (contact_number)})
+    var15 = unicode(var14) or u''
+    var16 = frappe.db.get_value("Customer", {"landline_mobile_2": (contact_number)}, "customer_name")
+    if var15 != "None" and customer_id != var15:
+        frappe.throw("Customer with contact no " + contact_number + " already exists \n Customer ID : " + var15 + "\n Lead Name : " + var16)
 
 
 @frappe.whitelist()
@@ -234,7 +242,6 @@ def selco_sales_invoice_before_insert(doc,method):
     else:
         if doc.type_of_invoice == "System Sales Invoice" or doc.type_of_invoice == "Spare Sales Invoice":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"sales_invoice_naming_series")
-            #frappe.msgprint("SI Naming series is" + doc.naming_series)
         elif doc.type_of_invoice == "Service Bill":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"service_bill_naming_series")
         elif doc.type_of_invoice == "Bill of Sale":
@@ -303,11 +310,28 @@ def selco_lead_before_insert(doc,method):
 
 @frappe.whitelist()
 def selco_lead_validate(doc,method):
-        if not ( doc.customer_contact_number or doc.customer_contact_number_landline ):
-            frappe.throw("Enter either Customer Contact Number ( Mobile 1 ) or Mobile 2 / Landline")
-        if doc.customer_contact_number:
-            if len(doc.customer_contact_number) != 10:
-                frappe.throw("Invalid Customer Contact Number ( Mobile 1 ) - Please enter exact 10 digits of mobile no ex : 9900038803")
+    if not ( doc.customer_contact_number or doc.customer_contact_number_landline ):
+        frappe.throw("Enter either Customer Contact Number ( Mobile 1 ) or Mobile 2 / Landline")
+    if doc.customer_contact_number:
+        if len(doc.customer_contact_number) != 10:
+            frappe.throw("Invalid Customer Contact Number ( Mobile 1 ) - Please enter exact 10 digits of mobile no ex : 9900038803")
+        selco_validate_if_lead_contact_number_exists(doc.customer_contact_number,doc.name)
+    if doc.customer_contact_number_landline:
+        selco_validate_if_lead_contact_number_exists(doc.customer_contact_number_landline,doc.name)
+
+
+def selco_validate_if_lead_contact_number_exists(contact_number,lead_id):
+    var4 = frappe.db.get_value("Lead", {"customer_contact_number_landline": (contact_number)})
+    var5 = unicode(var4) or u''
+    var6 = frappe.db.get_value("Lead", {"customer_contact_number_landline": (contact_number)}, "lead_name")
+    if var5 != "None" and lead_id != var5:
+        frappe.throw("Lead with contact no " + contact_number + " already exists \n Lead ID : " + var5 + "\n Lead Name : " + var6)
+
+    var14 = frappe.db.get_value("Lead", {"customer_contact_number": (contact_number)})
+    var15 = unicode(var14) or u''
+    var16 = frappe.db.get_value("Lead", {"customer_contact_number": (contact_number)}, "lead_name")
+    if var15 != "None" and lead_id != var15:
+        frappe.throw("Lead with contact no " + contact_number + " already exists \n Lead ID : " + var15 + "\n Lead Name : " + var16)
 
 @frappe.whitelist()
 def selco_address_before_insert(doc,method):
@@ -315,3 +339,17 @@ def selco_address_before_insert(doc,method):
         temp_name = frappe.get_value("Customer",doc.customer,"customer_name")
         doc.address_title = doc.customer + " - " + temp_name
         doc.name = doc.customer + " - " + temp_name + " - "
+
+
+@frappe.whitelist()
+def send_birthday_wishes():
+    list_of_bday = frappe.db.sql('SELECT employee_name FROM `tabEmployee` where DAY(date_of_birth) = DAY(CURDATE()) AND MONTH(date_of_birth) = MONTH(CURDATE()) AND status="Active" ',as_list=True)
+    bday_wish = ""
+    for employee in list_of_bday:
+        bday_wish += "Dear" + employee[0] + "</br>"
+    bday_wish += "Happy Birthday"
+
+    frappe.sendmail(
+		recipients=["basawaraj@selco-india.com"],
+		subject="Hapy Birthday Daily",
+		message=bday_wish)

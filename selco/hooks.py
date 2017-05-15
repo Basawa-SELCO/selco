@@ -133,9 +133,6 @@ doc_events = {
     }
  }
 
-# Scheduled Tasks
-# ---------------
-
 # scheduler_events = {
 #     "all": [
 #         "selco.tasks.all"
@@ -154,6 +151,11 @@ doc_events = {
 #     ]
 # }
 
+scheduler_events = {
+ "daily": [
+     'selco.selco.doctype.selco_customizations.selco_customizations.send_birthday_wishes'
+ ],
+ }
 # Testing
 # -------
 
