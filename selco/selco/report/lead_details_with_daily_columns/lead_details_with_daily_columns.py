@@ -1,6 +1,5 @@
 # Copyright (c) 2013, Selco and contributors
 # For license information, please see license.txt
-
 from __future__ import unicode_literals
 import frappe
 from frappe import _
@@ -61,49 +60,47 @@ def get_lead_details(filters):
     for key in count:
         my_list_of_list.append(count[key])
     my_total_list = map(sum, zip(*my_list_of_list))
-    my_total_list = ["<b>Daily Total</b>","","","",""] + my_total_list
-
-    return_list.append(my_total_list)
+    my_total_list = ["Daily Total","","","",""] + my_total_list
+    return_list.insert(0, my_total_list)
     return return_list
-
 
 def get_columns():
     return [
         _("Branch") + ":Link/Branch:100",
         _("Senior Manger") + ":Link/Sales Person:100",
         _("Name of SE") + ":Link/Sales Person:100",
-        _("SE Contact Number") + ":Data:130",
-        _("Designation") + ":Data:130",
-        _("1st") + ":Int:40",
-        _("2nd") + ":Int:40",
-        _("3rd") + ":Int:40",
-        _("4th") + ":Int:40",
-        _("5th") + ":Int:40",
-        _("6th") + ":Int:40",
-        _("7th") + ":Int:40",
-        _("8th") + ":Int:40",
-        _("9st") + ":Int:40",
-        _("10th") + ":Int:40",
-        _("11th") + ":Int:40",
-        _("12th") + ":Int:40",
-        _("13th") + ":Int:40",
-        _("14th") + ":Int:40",
-        _("15th") + ":Int:40",
-        _("16th") + ":Int:40",
-        _("17th") + ":Int:40",
-        _("18th") + ":Int:40",
-        _("19th") + ":Int:40",
-        _("20th") + ":Int:40",
-        _("21st") + ":Int:40",
-        _("22nd") + ":Int:40",
-        _("23rd") + ":Int:40",
-        _("24th") + ":Int:40",
-        _("25th") + ":Int:40",
-        _("26th") + ":Int:40",
-        _("27th") + ":Int:40",
-        _("28th") + ":Int:40",
-        _("29th") + ":Int:40",
-        _("30th") + ":Int:40",
-        _("31st") + ":Int:40",
-        _("Total") + ":Int:40"
+        _("SE Contact Number") + ":Data:85",
+        _("Designation") + ":Data:195",
+        _("1st") + ":Int:35",
+        _("2nd") + ":Int:35",
+        _("3rd") + ":Int:35",
+        _("4th") + ":Int:35",
+        _("5th") + ":Int:35",
+        _("6th") + ":Int:35",
+        _("7th") + ":Int:35",
+        _("8th") + ":Int:35",
+        _("9th") + ":Int:35",
+        _("10th") + ":Int:35",
+        _("11th") + ":Int:35",
+        _("12th") + ":Int:35",
+        _("13th") + ":Int:35",
+        _("14th") + ":Int:35",
+        _("15th") + ":Int:35",
+        _("16th") + ":Int:35",
+        _("17th") + ":Int:35",
+        _("18th") + ":Int:35",
+        _("19th") + ":Int:35",
+        _("20th") + ":Int:35",
+        _("21st") + ":Int:35",
+        _("22nd") + ":Int:35",
+        _("23rd") + ":Int:35",
+        _("24th") + ":Int:35",
+        _("25th") + ":Int:35",
+        _("26th") + ":Int:35",
+        _("27th") + ":Int:35",
+        _("28th") + ":Int:35",
+        _("29th") + ":Int:35",
+        _("30th") + ":Int:35",
+        _("31st") + ":Int:35",
+        _("Total") + ":Int:45"
         ]
