@@ -36,6 +36,11 @@ def selco_warranty_claim_updates(doc,method):
         frappe.throw("Warranty Claim for complaint " + doc.complaint_number + " already exists. <br /> Warranty Claim Number : " + var5 + "<br /> Customer Name : " + var6 + "<br /> You cannot link same complaint for tow warranty claims.<br />Please create another complaint.")
     if doc.workflow_state =="Dispatched From Godown":
         doc.status = "Closed"
+    if doc.complaint_number:
+        complaint = frappe.get_doc("Issue",doc.complaint_number)
+        complaint.warranty_claim_number = doc.name
+        complaint.save()
+
 
 @frappe.whitelist()
 def selco_delivery_note_updates(doc,method):
@@ -295,6 +300,12 @@ def selco_purchase_invoice_before_insert(doc,method):
         doc.naming_series = "DN/HO/16-17/"
 
 @frappe.whitelist()
+def selco_purchase_invoice_validate(doc,method):
+    doc.posting_date = doc.supplier_invoice_date
+    doc.due_date = doc.supplier_invoice_date
+    doc.bill_no = doc.supplier_invoice_number
+
+@frappe.whitelist()
 def clean_up(doc,method):
     var1 = 1
     #var1 = frappe.get_doc("Purchase Receipt", "MRN/S/17/004")
@@ -350,6 +361,6 @@ def send_birthday_wishes():
     bday_wish += "Happy Birthday"
 
     frappe.sendmail(
-		recipients=["basawaraj@selco-india.com"],
-		subject="Hapy Birthday Daily",
-		message=bday_wish)
+        recipients=["basawaraj@selco-india.com"],
+        subject="Hapy Birthday Daily",
+        message=bday_wish)

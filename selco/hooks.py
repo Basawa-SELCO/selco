@@ -119,7 +119,8 @@ doc_events = {
          #"on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_journal_entry_on_submit"
     },
     "Purchase Invoice": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_invoice_before_insert"
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_invoice_before_insert",
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_invoice_validate"
     },
     "Warehouse Type": {
          "validate": "selco.selco.doctype.selco_customizations.selco_customizations.clean_up"
