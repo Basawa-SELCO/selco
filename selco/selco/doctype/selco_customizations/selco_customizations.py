@@ -370,19 +370,41 @@ def send_birthday_wishes():
 
 @frappe.whitelist()
 def cleanup_si():
-    for d in frappe.db.get_all("Sales Invoice"):
+
+    for d in frappe.db.get_all("Sales Invoice",filters={"type_of_invoice": "Spare Sales Invoice"}):
+        si = frappe.get_doc("Sales Invoice",d.name)
+        si.cancel()
+        si.delete()
+
+    for d in frappe.db.get_all("Sales Invoice",filters={"type_of_invoice": "System Sales Invoice"}):
+        si = frappe.get_doc("Sales Invoice",d.name)
+        si.cancel()
+        si.delete()
+
+    for d in frappe.db.get_all("Sales Invoice",filters={"type_of_invoice": "Service Bill"}):
         si = frappe.get_doc("Sales Invoice",d.name)
         si.cancel()
         si.delete()
 
 def cleanup_dc():
+    for d in frappe.db.get_all("Delivery Note",filters={"docstatus": 2 }):
+        dc = frappe.get_doc("Delivery Note",d.name)
+        dc.delete()
+    for d in frappe.db.get_all("Delivery Note",filters={"docstatus": 0 }):
+        dc = frappe.get_doc("Delivery Note",d.name)
+        dc.delete()
+
     for d in frappe.db.get_all("Delivery Note"):
         dc = frappe.get_doc("Delivery Note",d.name)
         dc.cancel()
         dc.delete()
 
 def cleanup_se():
-    for d in frappe.db.get_all("Delivery Note"):
-        se = frappe.get_doc("Delivery Note",d.name)
-        se.cancel()
-        se.delete()
+    for d in frappe.db.get_all("Stock Entry",filters={"docstatus": 0 }):
+        dc = frappe.get_doc("Stock Entry",d.name)
+        dc.delete()
+    se_list = frappe.db.sql("select name from `tabStock Entry` where NULLIF(amended_from, '') IS NOT NULL AND docstatus AND  purpose = 'Material Transfer' ",as_list = True)
+    for d in se_list:
+        dc = frappe.get_doc("Stock Entry",d[0])
+        dc.cancel()
+        dc.delete()
