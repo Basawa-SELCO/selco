@@ -354,13 +354,35 @@ def selco_address_before_insert(doc,method):
 
 @frappe.whitelist()
 def send_birthday_wishes():
-    list_of_bday = frappe.db.sql('SELECT employee_name FROM `tabEmployee` where DAY(date_of_birth) = DAY(CURDATE()) AND MONTH(date_of_birth) = MONTH(CURDATE()) AND status="Active" ',as_list=True)
+    list_of_bday = frappe.db.sql('SELECT salutation,employee_name,designation,branch FROM `tabEmployee` where DAY(date_of_birth) = DAY(CURDATE()) AND MONTH(date_of_birth) = MONTH(CURDATE()) AND status="Active" ',as_list=True)
     bday_wish = ""
     for employee in list_of_bday:
-        bday_wish += "Dear" + employee[0] + "</br>"
-    bday_wish += "Happy Birthday"
-
+        bday_wish += "<b> Dear " + employee[0] + "." + employee[1].upper() + " (" + employee[2] + "," + employee[3] +  ") " + "</b>" + "<br>"
+    bday_wish += "सुदिनम् सुदिना जन्मदिनम् तव | भवतु मंगलं जन्मदिनम् || चिरंजीव कुरु कीर्तिवर्धनम् | चिरंजीव कुरुपुण्यावर्धनम् || विजयी भवतु सर्वत्र सर्वदा | जगति भवतु तव सुयशगानम् || <br><br>"
+    bday_wish +="​ಸೂರ್ಯನಿಂದ ನಿಮ್ಮೆಡೆಗೆ ಬರುವ ಪ್ರತಿಯೊಂದು ರಶ್ಮಿಯೂ ನಿಮ್ಮ ಬಾಳಿನ ಸಂತಸದ ಕ್ಷಣವಾಗಲಿ ಎಂದು ಹಾರೈಸುತ್ತಾ ಜನುಮ ದಿನದ  ಹಾರ್ದಿಕ ​ಶುಭಾಶಯಗಳು​.​<br><br>"
+    bday_wish +="Wishing you a wonderful day on your birthday. Let this be sacred and auspicious day for you. Wish you long live with a good fame and wish you long live with your good deeds. Wish you always make ever great achievements and let the world praise you for your success. Happy Birthday to our most beloved​. ​ ​SELCO Family wishes you Happy birthday.........!!!!!​​​ <br><br>"
+    bday_wish +="Best Regards<br>"
+    bday_wish +="SELCO Family​​<br>"
     frappe.sendmail(
         recipients=["basawaraj@selco-india.com"],
-        subject="Hapy Birthday Daily",
+        subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!!",
         message=bday_wish)
+
+@frappe.whitelist()
+def cleanup_si():
+    for d in frappe.db.get_all("Sales Invoice"):
+        si = frappe.get_doc("Sales Invoice",d.name)
+        si.cancel()
+        si.delete()
+
+def cleanup_dc():
+    for d in frappe.db.get_all("Delivery Note"):
+        dc = frappe.get_doc("Delivery Note",d.name)
+        dc.cancel()
+        dc.delete()
+
+def cleanup_se():
+    for d in frappe.db.get_all("Delivery Note"):
+        se = frappe.get_doc("Delivery Note",d.name)
+        se.cancel()
+        se.delete()
