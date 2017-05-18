@@ -36,7 +36,7 @@ def selco_warranty_claim_updates(doc,method):
         frappe.throw("Warranty Claim for complaint " + doc.complaint_number + " already exists. <br /> Warranty Claim Number : " + var5 + "<br /> Customer Name : " + var6 + "<br /> You cannot link same complaint for tow warranty claims.<br />Please create another complaint.")
     if doc.workflow_state =="Dispatched From Godown":
         doc.status = "Closed"
-    if doc.complaint_number:
+    if doc.complaint_number and doc.workflow_state == "Warranty Claim Format Raised - WC":
         complaint = frappe.get_doc("Issue",doc.complaint_number)
         complaint.warranty_claim_number = doc.name
         complaint.save()
@@ -155,14 +155,14 @@ def selco_stock_entry_updates(doc,method):
                     d.t_warehouse = "SELCO GIT Repair - SELCO"
                     d.cost_center = selco_cost_center
                     d.is_sample_item = 1
-    elif doc.purpose=="Rejection In":
+    elif doc.purpose=="Material Receipt":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_in_naming_series")
         doc.to_warehouse = selco_repair_warehouse
         for d in doc.get('items'):
             d.t_warehouse = selco_repair_warehouse
             d.cost_center = selco_cost_center
             d.is_sample_item = 1
-    elif doc.purpose=="Rejection Out":
+    elif doc.purpose=="Material Issue":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_out__naming_series")
         doc.from_warehouse = selco_repair_warehouse
         for d in doc.get('items'):
