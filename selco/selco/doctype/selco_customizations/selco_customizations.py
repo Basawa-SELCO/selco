@@ -155,14 +155,14 @@ def selco_stock_entry_updates(doc,method):
                     d.t_warehouse = "SELCO GIT Repair - SELCO"
                     d.cost_center = selco_cost_center
                     d.is_sample_item = 1
-    elif doc.purpose=="Material Receipt":
+    elif doc.purpose=="Rejection In":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_in_naming_series")
         doc.to_warehouse = selco_repair_warehouse
         for d in doc.get('items'):
             d.t_warehouse = selco_repair_warehouse
             d.cost_center = selco_cost_center
             d.is_sample_item = 1
-    elif doc.purpose=="Material Issue":
+    elif doc.purpose=="Rejection Out":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_out__naming_series")
         doc.from_warehouse = selco_repair_warehouse
         for d in doc.get('items'):
