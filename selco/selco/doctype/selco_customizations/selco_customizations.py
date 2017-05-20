@@ -302,7 +302,6 @@ def selco_purchase_invoice_before_insert(doc,method):
 @frappe.whitelist()
 def selco_purchase_invoice_validate(doc,method):
     doc.posting_date = doc.supplier_invoice_date
-    doc.due_date = doc.supplier_invoice_date
     doc.bill_no = doc.supplier_invoice_number
 
 @frappe.whitelist()
