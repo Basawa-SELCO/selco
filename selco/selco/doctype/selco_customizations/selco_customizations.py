@@ -270,6 +270,7 @@ def selco_payment_entry_before_insert(doc,method):
     elif doc.payment_type == "Pay":
         if doc.mode_of_payment == "Bank":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_naming_series")
+            doc.paid_from = frappe.db.get_value("Branch",doc.branch,"expenditure_account")
 
 def selco_journal_entry_before_insert(doc,method):
     local_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
@@ -301,7 +302,7 @@ def selco_purchase_invoice_before_insert(doc,method):
 
 @frappe.whitelist()
 def selco_purchase_invoice_validate(doc,method):
-    doc.posting_date = doc.supplier_invoice_date
+    #doc.posting_date = doc.supplier_invoice_date
     doc.bill_no = doc.supplier_invoice_number
 
 @frappe.whitelist()
@@ -373,7 +374,7 @@ def send_birthday_wishes():
             subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!! - ERP Test",
             message=bday_wish)
 
-@frappe.whitelist()
+"""@frappe.whitelist()
 def cleanup_si():
 
     for d in frappe.db.get_all("Sales Invoice",filters={"type_of_invoice": "Spare Sales Invoice"}):
@@ -412,4 +413,4 @@ def cleanup_se():
     for d in se_list:
         dc = frappe.get_doc("Stock Entry",d[0])
         dc.cancel()
-        dc.delete()
+        dc.delete()"""
