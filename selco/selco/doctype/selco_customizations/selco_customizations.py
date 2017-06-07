@@ -299,6 +299,7 @@ def selco_journal_entry_before_insert(doc,method):
 def selco_purchase_invoice_before_insert(doc,method):
     if doc.is_return == 1:
         doc.naming_series = "DN/HO/16-17/"
+    doc.naming_series = frappe.db.get_value("Warehouse",doc.godown,"purchase_invoice_naming_series")
 
 @frappe.whitelist()
 def selco_purchase_invoice_validate(doc,method):
