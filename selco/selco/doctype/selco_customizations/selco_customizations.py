@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import now,now_datetime
 import operator
+from erpnext.accounts.party import get_party_account, get_due_date
 
 
 
@@ -305,6 +306,7 @@ def selco_purchase_invoice_before_insert(doc,method):
 def selco_purchase_invoice_validate(doc,method):
     #doc.posting_date = doc.supplier_invoice_date
     doc.bill_no = doc.supplier_invoice_number
+    doc.due_date = get_due_date(doc.supplier_invoice_date, "Supplier", doc.supplier, doc.company)
 
 @frappe.whitelist()
 def clean_up(doc,method):
