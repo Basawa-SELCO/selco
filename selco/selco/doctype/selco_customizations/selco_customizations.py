@@ -254,7 +254,7 @@ def selco_sales_invoice_before_insert(doc,method):
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_sales_naming_series")
 
 @frappe.whitelist()
-def selco_sales_invoice_on_submit(doc,method):
+def selco_sales_invoice_validate(doc,method):
     #selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
     selco_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
     for d in doc.get('items'):

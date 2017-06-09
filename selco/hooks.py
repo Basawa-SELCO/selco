@@ -109,7 +109,7 @@ doc_events = {
     },
     "Sales Invoice": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_before_insert",
-         "on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_on_submit"
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_validate"
     },
     "Payment Entry": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_payment_entry_before_insert"
