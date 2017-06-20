@@ -295,6 +295,8 @@ def selco_journal_entry_before_insert(doc,method):
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"write_off_naming_series")
     if doc.voucher_type == "Bank Payment":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_naming_series")
+    if doc.voucher_type == "Receipt":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"receipt_naming_series")
 
 @frappe.whitelist()
 def selco_purchase_invoice_before_insert(doc,method):
@@ -376,6 +378,41 @@ def send_birthday_wishes():
             recipients = local_recipient,
             subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!! - ERP Test",
             message=bday_wish)
+@frappe.whitelist()
+def send_birthday_wishes():
+    list_of_bday = frappe.db.sql('SELECT salutation,employee_name,designation,branch FROM `tabEmployee` where DAY(date_of_birth) = DAY(CURDATE()) AND MONTH(date_of_birth) = MONTH(CURDATE()) AND status="Active" ',as_list=True)
+    bday_wish = ""
+    if list_of_bday:
+        for employee in list_of_bday:
+            bday_wish += "<b> Dear " + employee[0] + "." + employee[1].upper() + " (" + employee[2] + "," + employee[3] +  ") " + "</b>" + "<br>"
+        bday_wish += "<br>" + "सुदिनम् सुदिना जन्मदिनम् तव | भवतु मंगलं जन्मदिनम् || चिरंजीव कुरु कीर्तिवर्धनम् | चिरंजीव कुरुपुण्यावर्धनम् || विजयी भवतु सर्वत्र सर्वदा | जगति भवतु तव सुयशगानम् || <br><br>"
+        bday_wish +="​ಸೂರ್ಯನಿಂದ ನಿಮ್ಮೆಡೆಗೆ ಬರುವ ಪ್ರತಿಯೊಂದು ರಶ್ಮಿಯೂ ನಿಮ್ಮ ಬಾಳಿನ ಸಂತಸದ ಕ್ಷಣವಾಗಲಿ ಎಂದು ಹಾರೈಸುತ್ತಾ ಜನುಮ ದಿನದ  ಹಾರ್ದಿಕ ​ಶುಭಾಶಯಗಳು​.​<br><br>"
+        bday_wish +="Wishing you a wonderful day on your birthday. Let this be sacred and auspicious day for you. Wish you long live with a good fame and wish you long live with your good deeds. Wish you always make ever great achievements and let the world praise you for your success. Happy Birthday to our most beloved​. ​ ​SELCO Family wishes you Happy birthday.........!!!!!​​​ <br><br>"
+        bday_wish +="Best Regards<br>"
+        bday_wish +="SELCO Family​​<br>"
+        local_recipient = []
+        local_recipient.append("basawaraj@selco-india.com")
+        local_recipient.append("poorvi@selco-india.com")
+        local_recipient.append("venugopal@selco-india.com")
+        local_recipient.append("hr@selco-india.com")
+        frappe.sendmail(
+            recipients = local_recipient,
+            subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!! - ERP Test",
+            message=bday_wish)
+@frappe.whitelist()
+def send_po_reminder():
+    list_of_po = frappe.db.sql('SELECT name FROM `tabPurchase Order` where workflow_state = "AGM Approval Pending - PO" ',as_list=True)
+    po_reminder = "Please note below mentioned POs are in AGM Approval Pending Status, Please Approve The Same"
+    if list_of_po:
+        for name in list_of_po:
+            po_reminder += name[0]
+        local_recipient = []
+        local_recipient.append("basawaraj@selco-india.com")
+        local_recipient.append("poorvi@selco-india.com")
+        frappe.sendmail(
+            recipients = local_recipient,
+            subject="ERP Notification",
+            message=po_reminder)
 
 """@frappe.whitelist()
 def cleanup_si():
