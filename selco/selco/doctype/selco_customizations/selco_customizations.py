@@ -228,6 +228,7 @@ def selco_customer_updates(doc,method):
         selco_validate_if_customer_contact_number_exists(doc.landline_mobile_2,doc.name)
 
 def selco_validate_if_customer_contact_number_exists(contact_number,customer_id):
+    #frappe.msgprint(frappe.session.user)
     var4 = frappe.db.get_value("Customer", {"customer_contact_number": (contact_number)})
     var5 = unicode(var4) or u''
     var6 = frappe.db.get_value("Customer", {"customer_contact_number": (contact_number)}, "customer_name")
@@ -402,10 +403,11 @@ def send_birthday_wishes():
 @frappe.whitelist()
 def send_po_reminder():
     list_of_po = frappe.db.sql('SELECT name FROM `tabPurchase Order` where workflow_state = "AGM Approval Pending - PO" ',as_list=True)
-    po_reminder = "Please note below mentioned POs are in AGM Approval Pending Status, Please Approve The Same"
+    po_reminder = "Please note below mentioned POs are in <b>AGM Approval Pending Status</b>, Please approve the same.<br/>"
     if list_of_po:
         for name in list_of_po:
             po_reminder += name[0]
+            po_reminder += '<br/>'
         local_recipient = []
         local_recipient.append("basawaraj@selco-india.com")
         local_recipient.append("poorvi@selco-india.com")
