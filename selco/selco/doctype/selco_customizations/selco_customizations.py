@@ -280,10 +280,10 @@ def selco_journal_entry_before_insert(doc,method):
         account.cost_center = local_cost_center
     if doc.voucher_type == "Contra Entry":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"contra_naming_series")
-        if doc.branch == "Head Office" and doc.transfer_type == "Branch Collectiion To Platinum":
+        """if doc.branch == "Head Office" and doc.transfer_type == "Branch Collectiion To Platinum":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_collection")
         elif doc.branch == "Head Office" and doc.transfer_type == "Platinum To Branch Expenditure":
-            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_expenditure")
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_expenditure")"""
     if doc.voucher_type == "Cash Payment":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"cash_payment_naming_series")
     if doc.voucher_type == "Debit Note":
