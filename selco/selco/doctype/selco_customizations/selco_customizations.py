@@ -8,11 +8,39 @@ from frappe.model.document import Document
 from frappe.utils import now,now_datetime
 import operator
 from erpnext.accounts.party import get_party_account, get_due_date
-
-
+from datetime import datetime
+from datetime import timedelta
 
 class SelcoCustomizations(Document):
     pass
+
+@frappe.whitelist()
+def service_call_info():
+    #triggerS aT 12 O'clocK
+
+    if str(frappe.utils.data.nowtime().split(":")[0]) == '13':
+        info=frappe.db.sql("""SELECT B.day1,B.day2,B.day3,B.day4,B.day5,B.day6,B.day7,B.day8,B.day9,B.day10,B.day11,B.day12,B.day13,B.day14,B.day15,B.day16,B.day17,B.day18,B.day19,B.day20,B.day21,B.day22,B.day23,B.day24,B.day25,B.day26,B.day27,B.day28,B.day29,B.day30,B.day31,B.day1+B.day2+B.day3+B.day4+B.day5+B.day6+B.day7+B.day8+B.day9+B.day10+B.day11+B.day12+B.day13+B.day14+B.day15+B.day16+B.day17+B.day18+B.day19+B.day20+B.day21+B.day22+B.day23+B.day24+B.day25+B.day26+B.day27+B.day28+B.day29+B.day30+B.day31,B.service_person FROM `tabService Call` AS A INNER JOIN `tabService Call Details` AS B ON A.name=B.parent WHERE A.month=MONTHNAME(MONTH(ADDDATE(CURDATE(), -1))*100) """,as_list=1)
+        #0-30 indeX oF numbeR oF callS
+        #31 totaL callS
+        #32 servicE persoN
+
+        todate=int(str((datetime.now()+timedelta(days=-1)).date()).split("-")[2])
+        #yesterday'S datE
+        i=0
+        while i<len(info) :
+            if frappe.db.get_value("Service Person",info[i][32],"send_sms") :
+                cn=str(frappe.db.get_value("Service Person",info[i][32],"contact_number"))+"@sms.textlocal.in"
+                frappe.sendmail(
+                    recipients=[cn],
+                    subject="Number of Service Calls",
+                    message="Dear "+info[i][32]+". You have made "+str(int(info[i][todate-1]))+" service calls yesterday and a total of "+str(int(info[i][31]))+" service calls till yesterday!"
+                    )
+            i=i+1
+
+def month_service_person_unique(doc,method):
+    for d in doc.service_call_details:
+        if frappe.db.sql("""SELECT A.month,B.service_person FROM `tabService Call` AS A, `tabService Call Details` AS B WHERE A.name=B.parent AND A.month=%s AND B.service_person=%s """,(doc.month,d.service_person),as_list=1) :
+            frappe.throw("Repeated Record for "+d.service_person+" in "+doc.month)
 
 @frappe.whitelist()
 def selco_issue_updates(doc,method):
@@ -76,9 +104,11 @@ def selco_material_request_before_insert(doc,method):
 
 @frappe.whitelist()
 def selco_material_request_updates(doc,method):
+    #frappe.msgprint("selco_material_request_updates")
     doc.items.sort(key=operator.attrgetter("item_code"), reverse=False)
-    if doc.workflow_state == "Approved - IBM":
-         doc.approved_time = now()
+
+    selco_material_approved_and_dispatched(doc,method)
+
     if doc.workflow_state == "Partially Dispatched From Godown - IBM":
         flag = "N"
         for d in doc.get('items'):
@@ -88,10 +118,18 @@ def selco_material_request_updates(doc,method):
             if flag != "Y":
                 d.dispatched_quantity = d.qty
     if doc.workflow_state == "Dispatched From Godown - IBM":
-        doc.dispatched_time = now()
         for d in doc.get('items'):
             d.dispatched_quantity = d.qty
     #End of Insert By Poorvi on 08-02-2017
+
+@frappe.whitelist()
+def selco_material_approved_and_dispatched(doc,method):
+    #frappe.msgprint("selco_material_approved_and_dispatched")
+
+    if doc.workflow_state == "Approved - IBM":
+         doc.approved_time = now()
+    elif doc.workflow_state == "Dispatched From Godown - IBM":
+        doc.dispatched_time = now()
 
 @frappe.whitelist()
 def selco_purchase_receipt_before_insert(doc,method):
@@ -379,6 +417,7 @@ def send_birthday_wishes():
             recipients = local_recipient,
             subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!! - ERP Test",
             message=bday_wish)
+
 @frappe.whitelist()
 def send_birthday_wishes():
     list_of_bday = frappe.db.sql('SELECT salutation,employee_name,designation,branch FROM `tabEmployee` where DAY(date_of_birth) = DAY(CURDATE()) AND MONTH(date_of_birth) = MONTH(CURDATE()) AND status="Active" ',as_list=True)

@@ -94,6 +94,7 @@ doc_events = {
     "Material Request": {
          "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_updates",
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_before_insert"
+         #"on_update":"selco.selco.doctype.selco_customizations.selco_customizations.selco_material_approved_and_dispatched"
     },
     "Purchase Receipt": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_purchase_receipt_before_insert",
@@ -131,6 +132,9 @@ doc_events = {
     },
     "Address": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_address_before_insert"
+    },
+    "Service Call": {
+        "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.month_service_person_unique"
     }
  }
 
@@ -153,11 +157,14 @@ doc_events = {
 # }
 
 scheduler_events = {
- "daily": [
-     'selco.selco.doctype.selco_customizations.selco_customizations.send_birthday_wishes',
-     'selco.selco.doctype.selco_customizations.selco_customizations.send_po_reminder'
- ],
- }
+    "daily": [
+        'selco.selco.doctype.selco_customizations.selco_customizations.send_birthday_wishes',
+        'selco.selco.doctype.selco_customizations.selco_customizations.send_po_reminder'
+    ],
+    "hourly": [
+        "selco.selco.doctype.selco_customizations.selco_customizations.service_call_info"
+    ],
+}
 # Testing
 # -------
 
