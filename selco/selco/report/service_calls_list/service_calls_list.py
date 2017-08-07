@@ -15,12 +15,12 @@ def execute(filters):
 	columns= get_columns()
 	initial = get_data(filters)	#unorganized data
 
-	ins_sb=[]						#insentive service branch
+	ins_sb=[]						#insentive service
 	ins_ist=[]						#insentive installation
-	no_sb=[]						#no insentive service branch
+	no_sb=[]						#no insentive service
 	no_ist=[]						#no insentive installation
-	total_ins=[]					#total eligibe CSE for insentive
-	total_no=[]						#total uneligible CSE for insentive
+	total_ins=[]					#total insentive eligibe CSE
+	total_no=[]						#total insentive uneligible CSE
 
 	for d in initial:
 		if d[5]=="Service" :
@@ -123,7 +123,7 @@ def get_data(filters):
 	FROM `tabService Call` AS A INNER JOIN
 	`tabService Call Details` AS B INNER JOIN
 	`tabService Person` AS C ON A.name=B.parent
-	AND B.service_person=C.service_person_name
+	AND B.service_person=C.name
 	WHERE A.month= %s
 	ORDER BY B.day1+B.day2+B.day3+B.day4+B.day5+B.day6+B.day7+B.day8+B.day9+B.day10+
 	B.day11+B.day12+B.day13+B.day14+B.day15+B.day16+B.day17+B.day18+B.day19+B.day20+B.day21+B.day22+B.day23+B.day24+B.day25+
