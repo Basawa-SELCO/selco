@@ -113,7 +113,8 @@ doc_events = {
          "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_sales_invoice_validate"
     },
     "Payment Entry": {
-         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_payment_entry_before_insert"
+         "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_payment_entry_before_insert",
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_payment_entry_update"
     },
     "Journal Entry": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_journal_entry_before_insert"

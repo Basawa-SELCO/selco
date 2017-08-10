@@ -305,12 +305,22 @@ def selco_sales_invoice_validate(doc,method):
 def selco_payment_entry_before_insert(doc,method):
     if doc.payment_type == "Receive":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"receipt_naming_series")
-        #if doc.mode_of_payment == "Bank":
-        doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account")
+        if doc.mode_of_payment == "Bank":
+            doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account")
+        elif doc.mode_of_payment == "Cash":
+            doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account_cash")
     elif doc.payment_type == "Pay":
         if doc.mode_of_payment == "Bank":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_naming_series")
             doc.paid_from = frappe.db.get_value("Branch",doc.branch,"expenditure_account")
+
+def selco_payment_entry_update(doc,method):
+    if doc.payment_type == "Receive":
+        if doc.mode_of_payment == "Bank":
+            doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account")
+        elif doc.mode_of_payment == "Cash":
+            doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account_cash")
+            frappe.msgprint("Cash Account is" + doc.paid_to)
 
 def selco_journal_entry_before_insert(doc,method):
     local_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
