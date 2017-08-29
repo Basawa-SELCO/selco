@@ -465,6 +465,47 @@ def send_po_reminder():
             subject="ERP Notification",
             message=po_reminder)
 
+@frappe.whitelist()
+def selco_stock_entry_on_submit_updates(doc,method):
+    if((doc.type_of_stock_entry == "Rejection Out") and (doc.supplier_or_customer == "Customer")):
+        for item in doc.items:
+            ref_doc = frappe.get_doc("Stock Entry",item.reference_rej_in_or_rej_ot)
+            #frappe.msgprint(ref_doc)
+            for ref_item in ref_doc.items:
+                if ref_item.item_code == item.item_code:
+                    ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity + item.qty
+                    if ref_item.reference_rej_in_or_rej_quantity > ref_item.qty:
+                        frappe.throw("Please enter correct Quantity")
+            ref_doc.save()
+    if((doc.type_of_stock_entry == "Rejection In") and (doc.supplier_or_customer == "Supplier")):
+        for item in doc.items:
+            ref_doc = frappe.get_doc("Stock Entry",item.reference_rej_in_or_rej_ot)
+            #frappe.msgprint(ref_doc)
+            for ref_item in ref_doc.items:
+                if ref_item.item_code == item.item_code:
+                    ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity + item.qty
+                    if ref_item.reference_rej_in_or_rej_quantity > ref_item.qty:
+                        frappe.throw("Please enter correct Quantity")
+            ref_doc.save()
+
+
+@frappe.whitelist()
+def selco_stock_entry_on_cancel_updates(doc,method):
+    if(doc.type_of_stock_entry == "Rejection Out"):
+        for item in doc.items:
+            ref_doc = frappe.get_doc("Stock Entry",item.reference_rej_in_or_rej_ot)
+            for ref_item in ref_doc.items:
+                if ref_item.item_code == item.item_code:
+                    ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity - item.qty
+            ref_doc.save()
+    if(doc.type_of_stock_entry == "Rejection In"):
+        for item in doc.items:
+            ref_doc = frappe.get_doc("Stock Entry",item.reference_rej_in_or_rej_ot)
+            for ref_item in ref_doc.items:
+                if ref_item.item_code == item.item_code:
+                    ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity - item.qty
+            ref_doc.save()
+
 """@frappe.whitelist()
 def cleanup_si():
 
