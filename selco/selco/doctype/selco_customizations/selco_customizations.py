@@ -321,6 +321,11 @@ def selco_payment_entry_update(doc,method):
         elif doc.mode_of_payment == "Cash":
             doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account_cash")
             frappe.msgprint("Cash Account is" + doc.paid_to)
+    local_sum = 0
+    local_sum = doc.paid_amount
+    for deduction in doc.deductions:
+        local_sum = local_sum + deduction.amount
+    doc.received_amount_with_deduction = local_sum
 
 def selco_journal_entry_before_insert(doc,method):
     local_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
