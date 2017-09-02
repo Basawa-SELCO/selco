@@ -546,3 +546,15 @@ def cleanup_se():
         dc = frappe.get_doc("Stock Entry",d[0])
         dc.cancel()
         dc.delete()"""
+@frappe.whitelist()
+def selco_create_customer(branch,customer_group,customer_name,customer_contact_number,landline_mobile_2,gender,electrification_status):
+    local_cust = frappe.new_doc("Customer")
+    local_cust.branch = branch
+    local_cust.customer_group = customer_group
+    local_cust.customer_name = customer_name
+    local_cust.customer_contact_number = customer_contact_number
+    local_cust.landline_mobile_2 = landline_mobile_2
+    local_cust.gender = gender
+    local_cust.electrification_status = electrification_status
+    local_cust.insert()
+    return local_cust.name,local_cust.customer_name
