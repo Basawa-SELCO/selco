@@ -351,6 +351,8 @@ def selco_journal_entry_before_insert(doc,method):
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_naming_series")
     if doc.voucher_type == "Receipt":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"receipt_naming_series")
+    if doc.voucher_type == "Commission Journal":
+        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"commission_journal_naming_series")
 
 @frappe.whitelist()
 def selco_purchase_invoice_before_insert(doc,method):
@@ -488,6 +490,17 @@ def selco_stock_entry_on_submit_updates(doc,method):
             #frappe.msgprint(ref_doc)
             for ref_item in ref_doc.items:
                 if ref_item.item_code == item.item_code:
+                    ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity + item.qty
+                    if ref_item.reference_rej_in_or_rej_quantity > ref_item.qty:
+                        frappe.throw("Please enter correct Quantity")
+            ref_doc.save()
+    if(doc.type_of_stock_entry == "GRN"):
+        for item in doc.items:
+            item.reference_rej_in_or_rej_ot = doc.suppliers_ref
+            ref_doc = frappe.get_doc("Stock Entry",doc.suppliers_ref)
+            #frappe.msgprint(ref_doc)
+            for ref_item in ref_doc.items:
+                if (ref_item.item_code == item.item_code and ref_item.item_code == item.item_code):
                     ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity + item.qty
                     if ref_item.reference_rej_in_or_rej_quantity > ref_item.qty:
                         frappe.throw("Please enter correct Quantity")
