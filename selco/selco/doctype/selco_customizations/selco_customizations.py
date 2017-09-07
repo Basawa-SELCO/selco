@@ -216,6 +216,16 @@ def selco_stock_entry_updates(doc,method):
             d.t_warehouse = selco_selco_warehouse
 
 @frappe.whitelist()
+def selco_stock_entry_validate(doc,method):
+    if doc.type_of_stock_entry == "Outward DC":
+        local_warehouse = frappe.db.get_value("Branch",doc.being_dispatched_to,"selco_warehouse")
+        doc.branch_address_link = frappe.db.get_value("Warehouse",local_warehouse,"address")
+        from erpnext.utilities.doctype.address.address import get_address_display
+        doc.branch_address = "<b>" + doc.being_dispatched_to.upper() + " BRANCH</b><br>"
+        doc.branch_address += "SELCO SOLAR LIGHT PVT. LTD.<br>"
+        doc.branch_address += str(get_address_display(doc.branch_address_link))
+
+@frappe.whitelist()
 def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
     selco_var_dc = frappe.get_doc("Stock Entry",selco_doc_num)
     if selco_var_dc.being_dispatched_to != selco_branch:

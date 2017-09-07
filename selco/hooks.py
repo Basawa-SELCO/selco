@@ -102,6 +102,7 @@ doc_events = {
     },
     "Stock Entry": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates",
+         "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_validate",         
          "before_save": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_updates",
          "on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_on_submit_updates",
          "on_cancel": "selco.selco.doctype.selco_customizations.selco_customizations.selco_stock_entry_on_cancel_updates"
