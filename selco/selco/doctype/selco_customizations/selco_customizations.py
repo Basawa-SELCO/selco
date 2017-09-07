@@ -120,6 +120,10 @@ def selco_material_request_updates(doc,method):
     if doc.workflow_state == "Dispatched From Godown - IBM":
         for d in doc.get('items'):
             d.dispatched_quantity = d.qty
+    doc.branch_credit_limit = frappe.db.get_value("Branch",doc.branch,"branch_credit_limit")
+    doc.selco_senior_sales_manager_email_id = frappe.db.get_value("Branch",doc.branch,"selco_senior_sales_manager_email_id")
+    doc.godown_email_id = frappe.db.get_value("Branch",doc.branch,"godown_email_id")
+    doc.agms_email_id = frappe.db.get_value("Branch",doc.branch,"agms_email_id")     
     #End of Insert By Poorvi on 08-02-2017
 
 @frappe.whitelist()
@@ -217,13 +221,20 @@ def selco_stock_entry_updates(doc,method):
 
 @frappe.whitelist()
 def selco_stock_entry_validate(doc,method):
+    from erpnext.utilities.doctype.address.address import get_address_display
     if doc.type_of_stock_entry == "Outward DC":
         local_warehouse = frappe.db.get_value("Branch",doc.being_dispatched_to,"selco_warehouse")
         doc.branch_address_link = frappe.db.get_value("Warehouse",local_warehouse,"address")
-        from erpnext.utilities.doctype.address.address import get_address_display
         doc.branch_address = "<b>" + doc.being_dispatched_to.upper() + " BRANCH</b><br>"
         doc.branch_address += "SELCO SOLAR LIGHT PVT. LTD.<br>"
         doc.branch_address += str(get_address_display(doc.branch_address_link))
+    elif doc.type_of_stock_entry == "GRN":
+        sender = frappe.db.get_value("Stock Entry",doc.suppliers_ref,"branch")
+        sender_warehouse = frappe.db.get_value("Branch",sender,"selco_warehouse")
+        doc.sender_address_link = frappe.db.get_value("Warehouse",sender_warehouse,"address")
+        doc.sender_address = "<b>" + sender.upper() + " SELCO BRANCH</b><br>"
+        doc.sender_address += "SELCO SOLAR LIGHT PVT. LTD.<br>"
+        doc.sender_address += str(get_address_display(doc.sender_address_link))
 
 @frappe.whitelist()
 def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
