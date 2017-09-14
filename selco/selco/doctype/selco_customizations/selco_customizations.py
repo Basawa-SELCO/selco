@@ -65,10 +65,10 @@ def selco_warranty_claim_updates(doc,method):
         frappe.throw("Warranty Claim for complaint " + doc.complaint_number + " already exists. <br /> Warranty Claim Number : " + var5 + "<br /> Customer Name : " + var6 + "<br /> You cannot link same complaint for tow warranty claims.<br />Please create another complaint.")
     if doc.workflow_state =="Dispatched From Godown":
         doc.status = "Closed"
-    if doc.complaint_number and doc.workflow_state == "Warranty Claim Format Raised - WC":
+    """if doc.complaint_number and doc.workflow_state == "Warranty Claim Format Raised - WC":
         complaint = frappe.get_doc("Issue",doc.complaint_number)
         complaint.warranty_claim_number = doc.name
-        complaint.save()
+        complaint.save()"""
 
 
 @frappe.whitelist()
@@ -123,7 +123,7 @@ def selco_material_request_updates(doc,method):
     doc.branch_credit_limit = frappe.db.get_value("Branch",doc.branch,"branch_credit_limit")
     doc.selco_senior_sales_manager_email_id = frappe.db.get_value("Branch",doc.branch,"selco_senior_sales_manager_email_id")
     doc.godown_email_id = frappe.db.get_value("Branch",doc.branch,"godown_email_id")
-    doc.agms_email_id = frappe.db.get_value("Branch",doc.branch,"agms_email_id")     
+    doc.agms_email_id = frappe.db.get_value("Branch",doc.branch,"agms_email_id")
     #End of Insert By Poorvi on 08-02-2017
 
 @frappe.whitelist()
