@@ -156,7 +156,6 @@ def selco_purchase_receipt_updates(doc,method):
     doc.selco_list_of_po_date= ','.join([str(i) for i in po_list_date])
     #End of Insert By basawaraj On 7th september for printing the list of PO when PR is done by importing items from multiple PO
 
-
 @frappe.whitelist()
 def test_before_save(doc,method):
     pass #frappe.msgprint("Before Save")
@@ -447,36 +446,13 @@ def send_birthday_wishes():
         bday_wish +="Best Regards<br>"
         bday_wish +="SELCO Family​​<br>"
         local_recipient = []
-        local_recipient.append("basawaraj@selco-india.com")
-        local_recipient.append("poorvi@selco-india.com")
         local_recipient.append("venugopal@selco-india.com")
         local_recipient.append("hr@selco-india.com")
         frappe.sendmail(
             recipients = local_recipient,
-            subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!! - ERP Test",
+            subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!! - ERP",
             message=bday_wish)
 
-@frappe.whitelist()
-def send_birthday_wishes():
-    list_of_bday = frappe.db.sql('SELECT salutation,employee_name,designation,branch FROM `tabEmployee` where DAY(date_of_birth) = DAY(CURDATE()) AND MONTH(date_of_birth) = MONTH(CURDATE()) AND status="Active" ',as_list=True)
-    bday_wish = ""
-    if list_of_bday:
-        for employee in list_of_bday:
-            bday_wish += "<b> Dear " + employee[0] + "." + employee[1].upper() + " (" + employee[2] + "," + employee[3] +  ") " + "</b>" + "<br>"
-        bday_wish += "<br>" + "सुदिनम् सुदिना जन्मदिनम् तव | भवतु मंगलं जन्मदिनम् || चिरंजीव कुरु कीर्तिवर्धनम् | चिरंजीव कुरुपुण्यावर्धनम् || विजयी भवतु सर्वत्र सर्वदा | जगति भवतु तव सुयशगानम् || <br><br>"
-        bday_wish +="​ಸೂರ್ಯನಿಂದ ನಿಮ್ಮೆಡೆಗೆ ಬರುವ ಪ್ರತಿಯೊಂದು ರಶ್ಮಿಯೂ ನಿಮ್ಮ ಬಾಳಿನ ಸಂತಸದ ಕ್ಷಣವಾಗಲಿ ಎಂದು ಹಾರೈಸುತ್ತಾ ಜನುಮ ದಿನದ  ಹಾರ್ದಿಕ ​ಶುಭಾಶಯಗಳು​.​<br><br>"
-        bday_wish +="Wishing you a wonderful day on your birthday. Let this be sacred and auspicious day for you. Wish you long live with a good fame and wish you long live with your good deeds. Wish you always make ever great achievements and let the world praise you for your success. Happy Birthday to our most beloved​. ​ ​SELCO Family wishes you Happy birthday.........!!!!!​​​ <br><br>"
-        bday_wish +="Best Regards<br>"
-        bday_wish +="SELCO Family​​<br>"
-        local_recipient = []
-        local_recipient.append("basawaraj@selco-india.com")
-        local_recipient.append("poorvi@selco-india.com")
-        local_recipient.append("venugopal@selco-india.com")
-        local_recipient.append("hr@selco-india.com")
-        frappe.sendmail(
-            recipients = local_recipient,
-            subject="ಹುಟ್ಟುಹಬ್ಬದ ಶುಭಾಶಯಗಳು...............!!! - ERP Test",
-            message=bday_wish)
 @frappe.whitelist()
 def send_po_reminder():
     list_of_po = frappe.db.sql('SELECT name FROM `tabPurchase Order` where workflow_state = "AGM Approval Pending - PO" ',as_list=True)
@@ -486,11 +462,10 @@ def send_po_reminder():
             po_reminder += name[0]
             po_reminder += '<br/>'
         local_recipient = []
-        local_recipient.append("basawaraj@selco-india.com")
-        local_recipient.append("poorvi@selco-india.com")
+        local_recipient.append("jpai@selco-india.com")
         frappe.sendmail(
             recipients = local_recipient,
-            subject="ERP Notification",
+            subject="Purchase Order Approval Pending",
             message=po_reminder)
 
 @frappe.whitelist()
@@ -526,7 +501,13 @@ def selco_stock_entry_on_submit_updates(doc,method):
                     if ref_item.reference_rej_in_or_rej_quantity > ref_item.qty:
                         frappe.throw("Please enter correct Quantity")
             ref_doc.save()
-
+    if(doc.type_of_stock_entry == "Outward DC"):
+            recipient_email_id  = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
+            dc_submitted = "Please note new outwrad DC <b>" + doc.name + " </b>has been submitted <br/>"
+            frappe.sendmail(
+                recipients = recipient_email_id,
+                subject="Materials Dispatched To Your Branch",
+                message=dc_submitted)
 
 @frappe.whitelist()
 def selco_stock_entry_on_cancel_updates(doc,method):
@@ -597,3 +578,24 @@ def selco_create_customer(branch,customer_group,customer_name,customer_contact_n
     local_cust.electrification_status = electrification_status
     local_cust.insert()
     return local_cust.name,local_cust.customer_name
+@frappe.whitelist()
+def selco_add_new_address(branch,address_type,address_line1,address_line2,city,district,country,customer):
+    from erpnext.utilities.doctype.address.address import get_address_display
+    local_address = frappe.new_doc("Address")
+    local_address.branch = branch
+    local_address.address_type = address_type
+    local_address.address_line1 = address_line1
+    local_address_line2 = address_line2
+    local_address.city = city
+    local_address.district = district
+    local_address.country = country
+    local_address.customer = customer
+    local_address.insert()
+    return local_address.name,str(get_address_display(local_address.name))
+
+@frappe.whitelist()
+def selco_purchase_receipt_cancel_updates():
+    mrn_list = frappe.db.sql("""SELECT name FROM `tabPurchase Receipt` where posting_date < '2016-04-16' """,as_list=True)
+    for mrn in mrn_list:
+        local_mrn = frappe.get_doc("Purchase Receipt",mrn[0])
+        local_mrn.cancel()
