@@ -502,12 +502,13 @@ def selco_stock_entry_on_submit_updates(doc,method):
                         frappe.throw("Please enter correct Quantity")
             ref_doc.save()
     if(doc.type_of_stock_entry == "Outward DC"):
-            recipient_email_id  = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
+        doc.recipient_email_id = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
+            """recipient_email_id  = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
             dc_submitted = "Please note new outwrad DC <b>" + doc.name + " </b>has been submitted <br/>"
             frappe.sendmail(
                 recipients = recipient_email_id,
                 subject="Materials Dispatched To Your Branch",
-                message=dc_submitted)
+                message=dc_submitted)"""
 
 @frappe.whitelist()
 def selco_stock_entry_on_cancel_updates(doc,method):
