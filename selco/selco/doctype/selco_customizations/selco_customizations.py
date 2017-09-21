@@ -212,12 +212,14 @@ def selco_stock_entry_updates(doc,method):
             d.cost_center = selco_cost_center
             d.is_sample_item = 1
     elif doc.purpose=="Repack":
-        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_material_naming_series")
+        if doc.stock_journal == 0:
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bill_of_material_naming_series")
+        else:
+            doc.naming_series = "SJ/HO/17-18/"
         for d in doc.get('items'):
             d.cost_center = selco_cost_center
             d.s_warehouse = selco_selco_warehouse
             d.t_warehouse = selco_selco_warehouse
-
     if doc.type_of_stock_entry == "Outward DC":
         doc.recipient_email_id = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
 
