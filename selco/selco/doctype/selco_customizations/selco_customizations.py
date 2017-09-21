@@ -599,7 +599,19 @@ def selco_add_new_address(branch,address_type,address_line1,address_line2,city,d
 
 @frappe.whitelist()
 def selco_purchase_receipt_cancel_updates():
+    from erpnext.buying.doctype.purchase_order.purchase_order import update_status
     mrn_list = frappe.db.sql("""SELECT name FROM `tabPurchase Receipt` where posting_date < '2016-04-16' """,as_list=True)
     for mrn in mrn_list:
         local_mrn = frappe.get_doc("Purchase Receipt",mrn[0])
-        local_mrn.cancel()
+        closed_po = []
+        if local_mrn.status == "To Bill":
+            for item in local_mrn.items:
+                local_po1 = frappe.get_doc("Purchase Order",item.purchase_order)
+                if local_po1.status == "Closed":
+                    closed_po.append(local_po1.name)
+                    update_status('To Receive and Bill',local_po1.name)
+                    #local_po1.status = "To Receive and Bill"
+                    #local_po1.save()
+            local_mrn.cancel()
+        for po in closed_po:
+            update_status('Closed',po)
