@@ -52,4 +52,4 @@ def get_data(filters):
 
 
     return frappe.db.sql("""SELECT A.selco_date AS my_date,A.name,A.branch,B.item_name,B.item_code,B.description,B.qty,B.dispatched_quantity,B.qty - B.dispatched_quantity AS  to_be_dispatched,C.price_list_rate,C.price_list_rate*(B.qty - B.dispatched_quantity) AS amount,A.godown_email_id,A.workflow_state from `tabMaterial Request` A  JOIN `tabMaterial Request Item` B ON A.name = B.parent AND (B.qty-B.dispatched_quantity > 0)   %s AND  A.workflow_state
-IN ("Approved - IBM","Partially Dispatched From Godown - IBM","Approval Pending by SM - IBM") LEFT JOIN `tabItem Price` C ON C.price_list="Branch Sales" AND C.item_code=B.item_code """ % (conditions),as_dict=True)
+IN ("Approved - IBM","Partially Dispatched From Godown - IBM","Approval Pending by SM - IBM","Content Dispatch Pending","Content Dispatched") LEFT JOIN `tabItem Price` C ON C.price_list="Branch Sales" AND C.item_code=B.item_code """ % (conditions),as_dict=True)
