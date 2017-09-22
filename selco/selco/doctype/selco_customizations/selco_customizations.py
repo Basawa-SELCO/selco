@@ -220,6 +220,8 @@ def selco_stock_entry_updates(doc,method):
             d.cost_center = selco_cost_center
             d.s_warehouse = selco_selco_warehouse
             d.t_warehouse = selco_selco_warehouse
+            if d.t_warehouse:
+                d.basic_rate = 0
     if doc.type_of_stock_entry == "Outward DC":
         doc.recipient_email_id = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
 
