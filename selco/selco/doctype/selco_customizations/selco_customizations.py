@@ -333,7 +333,10 @@ def selco_payment_entry_before_insert(doc,method):
     if doc.payment_type == "Receive":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"receipt_naming_series")
         if doc.mode_of_payment == "Bank":
-            doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account")
+            if doc.allocate_payment_amount == 1:
+                doc.paid_to = frappe.db.get_value("Branch","Head Office","collection_account")
+            else:
+                doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account")
         elif doc.mode_of_payment == "Cash":
             doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account_cash")
     elif doc.payment_type == "Pay":
@@ -619,3 +622,10 @@ def selco_purchase_receipt_cancel_updates():
             local_mrn.cancel()
         for po in closed_po:
             update_status('Closed',po)
+@frappe.whitelist()
+def selco_stock_entry_cancel_updates():
+    dc_list = frappe.db.sql("""SELECT name FROM `tabStock Entry` where posting_date BETWEEN '2017-10-01' AND '2017-10-02' ORDER BY posting_date DESC """,as_list=True)
+    for dc in dc_list:
+        local_dc = frappe.get_doc("Stock Entry",dc[0])
+        if local_dc.docstatus == 1:
+            local_dc.cancel()
