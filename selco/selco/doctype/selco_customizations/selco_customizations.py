@@ -167,7 +167,7 @@ def selco_stock_entry_updates(doc,method):
     selco_repair_warehouse = frappe.db.get_value("Branch",doc.branch,"repair_warehouse")
 
     if doc.purpose=="Material Transfer":
-        if doc.inward_or_outward=="Inward":
+        if doc.inward_or_outward=="Inward" and doc.type_of_stock_entry == "GRN":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"receipt_note_naming_series")
             if doc.type_of_material=="Good Stock":
                 for d in doc.get('items'):
@@ -180,7 +180,12 @@ def selco_stock_entry_updates(doc,method):
                     d.t_warehouse = selco_repair_warehouse
                     d.cost_center = selco_cost_center
                     d.is_sample_item = 1
-        elif doc.inward_or_outward=="Outward":
+        elif doc.inward_or_outward=="Inward" and doc.type_of_stock_entry == "Demo - Material Return":
+            for d in doc.get('items'):
+                d.cost_center = selco_cost_center
+                d.s_warehouse = "Demo Warehouse - SELCO"
+                d.t_warehouse = selco_selco_warehouse
+        elif doc.inward_or_outward=="Outward" and doc.type_of_stock_entry== "Outward DC":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"delivery_note_naming_series")
             if doc.type_of_material=="Good Stock":
                 doc.from_warehouse = selco_selco_warehouse
@@ -197,6 +202,12 @@ def selco_stock_entry_updates(doc,method):
                     d.t_warehouse = "SELCO GIT Repair - SELCO"
                     d.cost_center = selco_cost_center
                     d.is_sample_item = 1
+        elif doc.inward_or_outward=="Outward" and doc.type_of_stock_entry== "Demo - Material Issue":
+            doc.naming_series = frappe.db.get_value("Branch",doc.branch,"delivery_note_naming_series")
+            for d in doc.get('items'):
+                d.s_warehouse = selco_selco_warehouse
+                d.t_warehouse = "Demo Warehouse - SELCO"
+                d.cost_center = selco_cost_center
     elif doc.purpose=="Material Receipt":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"rejection_in_naming_series")
         doc.to_warehouse = selco_repair_warehouse
@@ -245,7 +256,7 @@ def selco_stock_entry_validate(doc,method):
 @frappe.whitelist()
 def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
     selco_var_dc = frappe.get_doc("Stock Entry",selco_doc_num)
-    if selco_var_dc.being_dispatched_to != selco_branch:
+    if selco_var_dc.type_of_stock_entry != "Demo - Material Issue" and doc.being_dispatched_to != selco_branch:
         frappe.throw("Incorrect DC Number");
     from_warehouse = selco_var_dc.to_warehouse
     if selco_var_dc.type_of_material=="Good Stock":
