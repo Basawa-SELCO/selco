@@ -256,7 +256,7 @@ def selco_stock_entry_validate(doc,method):
 @frappe.whitelist()
 def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):
     selco_var_dc = frappe.get_doc("Stock Entry",selco_doc_num)
-    if selco_var_dc.type_of_stock_entry != "Demo - Material Issue" and doc.being_dispatched_to != selco_branch:
+    if selco_var_dc.type_of_stock_entry != "Demo - Material Issue" and selco_var_dc.being_dispatched_to != selco_branch:
         frappe.throw("Incorrect DC Number");
     from_warehouse = selco_var_dc.to_warehouse
     if selco_var_dc.type_of_material=="Good Stock":
@@ -510,7 +510,7 @@ def selco_stock_entry_on_submit_updates(doc,method):
                     ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity + item.qty
                     if ref_item.reference_rej_in_or_rej_quantity > ref_item.qty:
                         frappe.throw("Please enter correct Quantity")
-            ref_doc.save()
+            ref_doc.save(ignore_permissions=True)
     if(doc.type_of_stock_entry == "GRN"):
         for item in doc.items:
             item.reference_rej_in_or_rej_ot = doc.suppliers_ref
@@ -521,7 +521,7 @@ def selco_stock_entry_on_submit_updates(doc,method):
                     ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity + item.qty
                     if ref_item.reference_rej_in_or_rej_quantity > ref_item.qty:
                         frappe.throw("Please enter correct Quantity")
-            ref_doc.save()
+            ref_doc.save(ignore_permissions=True)
     if(doc.type_of_stock_entry == "Outward DC"):
         pass
         """recipient_email_id  = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
