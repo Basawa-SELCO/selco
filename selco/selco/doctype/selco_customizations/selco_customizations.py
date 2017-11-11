@@ -368,6 +368,10 @@ def selco_payment_entry_update(doc,method):
         local_sum = local_sum + deduction.amount
     doc.received_amount_with_deduction = local_sum
 
+def selco_payment_entry_before_delete(doc,method):
+    if "System Manager" not in frappe.get_roles():
+        frappe.throw("You cannot delete Payment Entries")
+
 def selco_journal_entry_before_insert(doc,method):
     local_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
     for account in doc.accounts:
@@ -640,3 +644,19 @@ def selco_stock_entry_cancel_updates():
         local_dc = frappe.get_doc("Stock Entry",dc[0])
         if local_dc.docstatus == 1:
             local_dc.cancel()
+
+@frappe.whitelist()
+def selco_test_print():
+    #my_attachments = [frappe.attach_print("Purchase Order", "PO/MPL/16-17/00468", file_name="po_file",print_format="SELCO PO")]
+    my_attachments = []
+    local_var = []
+    receipt_list = frappe.db.sql("""SELECT name from `tabPayment Entry` where posting_date BETWEEN "20170901" AND "20170930" """,as_dict=True)
+    for receipt in receipt_list:
+        local_var += frappe.attach_print("Payment Entry", receipt, file_name="Receipts",print_format="SELCO_Receipt_4_Copies")
+    my_attachments = local_var
+    frappe.sendmail(
+            recipients = ["basawaraj@selco-india.com"],
+            subject="Your PO",
+            message="PO",
+            attachments=my_attachments,
+            now=True)
