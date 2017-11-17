@@ -400,6 +400,15 @@ def selco_journal_entry_before_insert(doc,method):
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"commission_journal_naming_series")
 
 @frappe.whitelist()
+def selco_journal_entry_validate(doc,method):
+    local_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
+    if doc.use_different_cost_center == 1:
+        local_cost_center = doc.alternative_cost_center
+        frappe.msgprint(local_cost_center)
+    for account in doc.accounts:
+        account.cost_center = local_cost_center
+
+@frappe.whitelist()
 def selco_purchase_invoice_before_insert(doc,method):
     if doc.is_return == 1:
         doc.naming_series = "DN/HO/16-17/"
@@ -544,7 +553,14 @@ def selco_stock_entry_on_cancel_updates(doc,method):
                 if ref_item.item_code == item.item_code:
                     ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity - item.qty
             ref_doc.save()
-    if(doc.type_of_stock_entry == "Rejection In"):
+    """if(doc.type_of_stock_entry == "Rejection In"):
+        for item in doc.items:
+            ref_doc = frappe.get_doc("Stock Entry",item.reference_rej_in_or_rej_ot)
+            for ref_item in ref_doc.items:
+                if ref_item.item_code == item.item_code:
+                    ref_item.reference_rej_in_or_rej_quantity = ref_item.reference_rej_in_or_rej_quantity - item.qty
+            ref_doc.save()"""
+    if(doc.type_of_stock_entry == "GRN"):
         for item in doc.items:
             ref_doc = frappe.get_doc("Stock Entry",item.reference_rej_in_or_rej_ot)
             for ref_item in ref_doc.items:
