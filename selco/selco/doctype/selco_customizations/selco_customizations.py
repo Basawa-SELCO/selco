@@ -74,12 +74,12 @@ def selco_warranty_claim_updates(doc,method):
 @frappe.whitelist()
 def selco_delivery_note_updates(doc,method):
     selco_warehouse  = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
-    selco_cost_center = frappe.db.get_value("Warehouse",selco_warehouse,"cost_center")
+    selco_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
     for d in doc.get('items'):
         d.warehouse = selco_warehouse
         d.cost_center = selco_cost_center
-        if not d.rate:
-            d.rate = frappe.db.get_value("Item Price",{"price_list": "Branch Sales","item_code":d.item_code}, "price_list_rate")
+        #if not d.rate:
+            #d.rate = frappe.db.get_value("Item Price",{"price_list": "Branch Sales","item_code":d.item_code}, "price_list_rate")
 @frappe.whitelist()
 def selco_delivery_note_before_insert(doc,method):
     if doc.is_return:
@@ -162,6 +162,7 @@ def test_before_save(doc,method):
 
 @frappe.whitelist()
 def selco_stock_entry_updates(doc,method):
+    doc.items.sort(key=operator.attrgetter("item_code"), reverse=False)
     selco_cost_center = frappe.db.get_value("Branch",doc.branch,"cost_center")
     selco_selco_warehouse = frappe.db.get_value("Branch",doc.branch,"selco_warehouse")
     selco_repair_warehouse = frappe.db.get_value("Branch",doc.branch,"repair_warehouse")
@@ -174,12 +175,14 @@ def selco_stock_entry_updates(doc,method):
                     d.cost_center = selco_cost_center
                     d.from_warehouse = "SELCO GIT - SELCO"
                     d.to_warehouse = selco_selco_warehouse
+                    d.reference_rej_in_or_rej_quantity = doc.suppliers_ref
             else:
                 for d in doc.get('items'):
                     d.s_warehouse = "SELCO GIT Repair - SELCO"
                     d.t_warehouse = selco_repair_warehouse
                     d.cost_center = selco_cost_center
                     d.is_sample_item = 1
+                    d.reference_rej_in_or_rej_quantity = doc.suppliers_ref
         elif doc.inward_or_outward=="Inward" and doc.type_of_stock_entry == "Demo - Material Return":
             for d in doc.get('items'):
                 d.cost_center = selco_cost_center
@@ -252,6 +255,7 @@ def selco_stock_entry_validate(doc,method):
         doc.sender_address = "<b>" + sender.upper() + " SELCO BRANCH</b><br>"
         doc.sender_address += "SELCO SOLAR LIGHT PVT. LTD.<br>"
         doc.sender_address += str(get_address_display(doc.sender_address_link))
+    #doc.items.sort(key=operator.attrgetter("item_code"), reverse=False)
 
 @frappe.whitelist()
 def get_items_from_outward_stock_entry(selco_doc_num,selco_branch):

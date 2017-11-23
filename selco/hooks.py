@@ -89,7 +89,7 @@ doc_events = {
     },
     "Delivery Note": {
          "before_insert": "selco.selco.doctype.selco_customizations.selco_customizations.selco_delivery_note_before_insert",
-         "on_submit": "selco.selco.doctype.selco_customizations.selco_customizations.selco_delivery_note_updates"
+         "before_save": "selco.selco.doctype.selco_customizations.selco_customizations.selco_delivery_note_updates"
     },
     "Material Request": {
          "validate": "selco.selco.doctype.selco_customizations.selco_customizations.selco_material_request_updates",
