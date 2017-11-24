@@ -176,6 +176,7 @@ def selco_stock_entry_updates(doc,method):
                     d.from_warehouse = "SELCO GIT - SELCO"
                     d.to_warehouse = selco_selco_warehouse
                     d.reference_rej_in_or_rej_quantity = doc.suppliers_ref
+                    d.basic_rate = 0
             else:
                 for d in doc.get('items'):
                     d.s_warehouse = "SELCO GIT Repair - SELCO"
@@ -183,6 +184,7 @@ def selco_stock_entry_updates(doc,method):
                     d.cost_center = selco_cost_center
                     d.is_sample_item = 1
                     d.reference_rej_in_or_rej_quantity = doc.suppliers_ref
+                    d.basic_rate = 0
         elif doc.inward_or_outward=="Inward" and doc.type_of_stock_entry == "Demo - Material Return":
             for d in doc.get('items'):
                 d.cost_center = selco_cost_center
@@ -197,6 +199,7 @@ def selco_stock_entry_updates(doc,method):
                     d.s_warehouse = selco_selco_warehouse
                     d.t_warehouse = "SELCO GIT - SELCO"
                     d.cost_center = selco_cost_center
+                    d.basic_rate = 0
             else:
                 doc.from_warehouse = selco_repair_warehouse
                 doc.to_warehouse = "SELCO GIT Repair - SELCO"
@@ -205,6 +208,7 @@ def selco_stock_entry_updates(doc,method):
                     d.t_warehouse = "SELCO GIT Repair - SELCO"
                     d.cost_center = selco_cost_center
                     d.is_sample_item = 1
+                    d.basic_rate = 0
         elif doc.inward_or_outward=="Outward" and doc.type_of_stock_entry== "Demo - Material Issue":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"delivery_note_naming_series")
             for d in doc.get('items'):
@@ -234,8 +238,7 @@ def selco_stock_entry_updates(doc,method):
             d.cost_center = selco_cost_center
             d.s_warehouse = selco_selco_warehouse
             d.t_warehouse = selco_selco_warehouse
-            if d.t_warehouse:
-                d.basic_rate = 0
+            d.basic_rate = 0
     if doc.type_of_stock_entry == "Outward DC":
         doc.recipient_email_id = frappe.db.get_value("Branch",doc.being_dispatched_to,"branch_email_id")
 
