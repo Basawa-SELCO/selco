@@ -10,6 +10,7 @@ import operator
 from erpnext.accounts.party import get_party_account, get_due_date
 from datetime import datetime
 from datetime import timedelta
+from frappe.utils import today
 
 class SelcoCustomizations(Document):
     pass
@@ -155,6 +156,11 @@ def selco_purchase_receipt_updates(doc,method):
     doc.selco_list_of_po= ','.join([str(i) for i in po_list])
     doc.selco_list_of_po_date= ','.join([str(i) for i in po_list_date])
     #End of Insert By basawaraj On 7th september for printing the list of PO when PR is done by importing items from multiple PO
+    if doc.type_of_purchase == "Normal":
+        for d in doc.get('items'):
+            if not d.purchase_order :
+                frappe.throw("Purchase Order Is Mandatory")
+
 
 @frappe.whitelist()
 def test_before_save(doc,method):
@@ -367,12 +373,18 @@ def selco_payment_entry_update(doc,method):
             doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account")
         elif doc.mode_of_payment == "Cash":
             doc.paid_to = frappe.db.get_value("Branch",doc.branch,"collection_account_cash")
-            frappe.msgprint("Cash Account is" + doc.paid_to)
+            #frappe.msgprint("Cash Account is" + doc.paid_to)
     local_sum = 0
     local_sum = doc.paid_amount
     for deduction in doc.deductions:
         local_sum = local_sum + deduction.amount
     doc.received_amount_with_deduction = local_sum
+    #frappe.msgprint(doc.posting_date)
+    #frappe.msgprint(datetime().date())
+    cur_date = today()
+    #frappe.msgprint(cur_date)
+    if doc.posting_date > cur_date:
+        frappe.throw("Wront date - Please check")
 
 def selco_payment_entry_before_delete(doc,method):
     if "System Manager" not in frappe.get_roles():
