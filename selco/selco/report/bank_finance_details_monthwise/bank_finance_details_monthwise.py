@@ -48,5 +48,5 @@ def get_data(filters):
         msd = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
         med = frappe.db.get_value("Fiscal Year", fiscal_year, "year_end_date")
 
-    return frappe.db.sql("""SELECT name,branch,posting_date,party_name,received_amount,financing_institution,financing_institution_branch FROM `tabPayment Entry`  WHERE financed_by_bank_microfinance_ngo  = 'YES'
+    return frappe.db.sql("""SELECT name,branch,posting_date,party_name,received_amount,financing_institution,financing_institution_branch FROM `tabPayment Entry`  WHERE financed  = 'YES'
 and financing_institution != 'SKDRDP' and posting_date BETWEEN %s AND %s ORDER BY financing_institution,financing_institution_branch,posting_date""",(msd,med),as_dict=1)
