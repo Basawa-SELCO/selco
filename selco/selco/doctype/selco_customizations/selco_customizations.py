@@ -160,6 +160,9 @@ def selco_purchase_receipt_updates(doc,method):
         for d in doc.get('items'):
             if not d.purchase_order :
                 frappe.throw("Purchase Order Is Mandatory")
+    if doc.type_of_purchase != frappe.db.get_value("Supplier",doc.supplier,"type_of_purchase"):
+        frappe.throw("Type of purchase is incorrect")
+
 
 
 @frappe.whitelist()
@@ -401,7 +404,7 @@ def selco_journal_entry_before_insert(doc,method):
         elif doc.branch == "Head Office" and doc.transfer_type == "Platinum To Branch Expenditure":
             doc.naming_series = frappe.db.get_value("Branch",doc.branch,"bank_payment_expenditure")"""
     if doc.voucher_type == "Cash Payment":
-        doc.naming_series = frappe.db.get_value("Branch",doc.branch,"cash_payment_naming_series")
+        pass #doc.naming_series = frappe.db.get_value("Branch",doc.branch,"cash_payment_naming_series")
     if doc.voucher_type == "Debit Note":
         doc.naming_series = frappe.db.get_value("Branch",doc.branch,"debit_note_naming_series")
     if doc.voucher_type == "Credit Note":
@@ -492,9 +495,9 @@ def send_birthday_wishes():
     if list_of_bday:
         for employee in list_of_bday:
             bday_wish += "<b> Dear " + employee[0] + "." + employee[1].upper() + " (" + employee[2] + "," + employee[3] +  ") " + "</b>" + "<br>"
-        bday_wish += "<br>" + "सुदिनम् सुदिना जन्मदिनम् तव | भवतु मंगलं जन्मदिनम् || चिरंजीव कुरु कीर्तिवर्धनम् | चिरंजीव कुरुपुण्यावर्धनम् || विजयी भवतु सर्वत्र सर्वदा | जगति भवतु तव सुयशगानम् || <br><br>"
-        bday_wish +="​ಸೂರ್ಯನಿಂದ ನಿಮ್ಮೆಡೆಗೆ ಬರುವ ಪ್ರತಿಯೊಂದು ರಶ್ಮಿಯೂ ನಿಮ್ಮ ಬಾಳಿನ ಸಂತಸದ ಕ್ಷಣವಾಗಲಿ ಎಂದು ಹಾರೈಸುತ್ತಾ ಜನುಮ ದಿನದ  ಹಾರ್ದಿಕ ​ಶುಭಾಶಯಗಳು​.​<br><br>"
-        bday_wish +="Wishing you a wonderful day on your birthday. Let this be sacred and auspicious day for you. Wish you long live with a good fame and wish you long live with your good deeds. Wish you always make ever great achievements and let the world praise you for your success. Happy Birthday to our most beloved​. ​ ​SELCO Family wishes you Happy birthday.........!!!!!​​​ <br><br>"
+        bday_wish += "<br>" +"​​ಈ ಶುಭದಿನವು ನಿಮ್ಮ ಬಾಳಿನ ಸಂತಸದ ಕ್ಷಣವಾಗಲಿ ಎಂದು ಹಾಗೂ ಆರೋಗ್ಯ ಸಮೃದ್ಧಿಯನ್ನು, ಹಾರೈಸುತ್ತಾ ಜನ್ಮದಿನದ ಹಾರ್ದಿಕ ​ಶುಭಾಶಯಗಳು​.​<br><br>"
+        bday_wish +="जन्मदिनमिदम् शंतनोतु हि सर्वदा मुदम् प्रार्थयामहे भव शतायु: ईश्वर सदा त्वाम् च रक्षतु पुण्य कर्मणा कीर्तिमार्जय जीवनम् तव भवतु सार्थकम्​<br><br>"
+        bday_wish +="We hope that your special day is full of excitement,joy and fulfillment.You give so much of yourself to your work, May this year be a great year for you, and may you accomplish all the wonderful goals that you have set for yourself. Happy birthday. SELCO Family wishes you Happy birthday.........!!!!!​​​<br><br>"
         bday_wish +="Best Regards<br>"
         bday_wish +="SELCO Family​​<br>"
         local_recipient = []
